@@ -13,11 +13,11 @@
   "casesToRun":
   [ 
     {
-      "location": "https://github.com/IsaacDavidMoreraVargas/WEB-TESTER-SELENIUM/",
+      "location": "https://raw.githubusercontent.com/IsaacDavidMoreraVargas/WEB-TESTER-SELENIUM/main/SAVETEMPLATESFOLDERS/case1.json",
 	  "timesToRepeat":2
 	},
 	{
-	  "location": "C:/Users/Alcatraz/Desktop/WEB-TESTER-SELENIUM/TEMPLATE-TEST/test/case.json",
+	  "location": "C:/Users/Alcatraz/Desktop/WEB-TESTER-SELENIUM/SAVETEMPLATESFOLDERS/case.json",
 	  "timesToRepeat":1
 	}
   ]

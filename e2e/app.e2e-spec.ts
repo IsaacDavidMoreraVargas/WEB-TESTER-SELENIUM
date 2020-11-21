@@ -23,7 +23,12 @@ function startProgram()
 {
 
   actualPath=page.getResultCmd(actualPath);
-  console.log(actualPath);
+  try
+  {
+    let commandCreateFolder="mkdir "+actualPath+"\\e2e\\downloadedFiles";
+    page.executeResultCmd(commandCreateFolder);
+  }catch(err){}
+
   if(browser.params.menu==true)
   {
     showMenu(); 
@@ -35,20 +40,9 @@ function startProgram()
     {
       if(splittedData.length==2)
       {
-        /*
-        let exist=page.ifFileExistInsideComputer(splittedData[1]);
-        if(exist==true)
-        {
-          */
-          let dataJson=chargeFromComputer(splittedData[1]);
-          executingAfterCharge();
-          sendingEmails(dataJson);
-          /*
-        }else
-        {
-          failMessage+=failArray[0];
-        }
-        */
+        let dataJson=chargeFromComputer(splittedData[1]);
+        executingAfterCharge();
+        sendingEmails(dataJson);
       }else
       {
         failMessage+=itemsArray[3]+wrongArray[0]+itemsArray[3];
@@ -84,10 +78,14 @@ function chargeFromComputer(urlToStudying)
   let pathSave=actualPath+"\\e2e\\downloadedFiles\\general.json";
   if(extract.includes("https:")||extract.includes("http:"))
   {
-    let createCommand="powershell -Command "+'"& ' +actualPath+"\\e2e\\scripts\\scriptReadFileOnline.ps1 -url "+urlToStudying+" "+pathSave+'"';
-    page.executeResultCmd(createCommand);
-    let dataRead=page.chargeDataOfFile(pathSave);
-    dataJson=page.succesParseJson(dataRead);
+    try
+    {
+      let createCommand="powershell -Command "+'"& ' +actualPath+"\\e2e\\scripts\\scriptReadFileOnline.ps1 -url "+urlToStudying+" "+pathSave+'"';
+      page.executeResultCmd(createCommand);
+      let dataRead=page.chargeDataOfFile(pathSave);
+      dataJson=page.succesParseJson(dataRead)
+      page.eraseFiles(pathSave);
+    }catch(err){failMessage+=itemsArray[3]+wrongArray[0]+itemsArray[3];}
   }else
   {
     let exist=page.ifFileExistInsideComputer(urlToStudying);
@@ -96,12 +94,13 @@ function chargeFromComputer(urlToStudying)
       page.readFileAndSaveFile(urlToStudying,pathSave);
       let dataRead=page.chargeDataOfFile(urlToStudying);
       dataJson=page.succesParseJson(dataRead);
+      page.eraseFiles(pathSave);
     }else
     {
       failMessage+=itemsArray[3]+wrongArray[0]+itemsArray[3];
     }
   }
-  page.eraseFiles(pathSave);
+ 
 
   if(dataJson.casesToRun)
   {
@@ -128,16 +127,19 @@ function chargeFromComputer(urlToStudying)
           if(extract.includes("https:")||extract.includes("http:"))
           {
             let createCommand="powershell -Command "+'"& ' +actualPath+"\\e2e\\scripts\\scriptReadFileOnline.ps1 -url "+specificCase.location+" "+pathSave+'"';
-            page.executeResultCmd(createCommand);
-            let dataRead=page.chargeDataOfFile(pathSave);
-            let dataJsonSpecific=page.succesParseJson(dataRead);
-            for(let repeat=0; repeat<specificCase.timesToRepeat;repeat++)
+            try
             {
+              page.executeResultCmd(createCommand);
               let dataRead=page.chargeDataOfFile(pathSave);
-              let dataJsonSpecific2=page.succesParseJson(dataRead);
-              listOfCases.push(dataJsonSpecific2);
-            }
-            page.eraseFiles(pathSave);
+              let dataJsonSpecific=page.succesParseJson(dataRead);
+              for(let repeat=0; repeat<specificCase.timesToRepeat;repeat++)
+              {
+                let dataRead=page.chargeDataOfFile(pathSave);
+                let dataJsonSpecific2=page.succesParseJson(dataRead);
+                listOfCases.push(dataJsonSpecific2);
+              }
+              page.eraseFiles(pathSave);
+            }catch(err){failMessage+=itemsArray[3]+wrongArray[0]+itemsArray[3];}
           }else
           {
             let exist=page.ifFileExistInsideComputer(specificCase.location);
