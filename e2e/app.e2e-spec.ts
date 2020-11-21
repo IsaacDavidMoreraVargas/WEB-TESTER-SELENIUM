@@ -16,11 +16,14 @@ var listOfCases = new Array();
 
 let page = new Methods();
 let actualPath="echo | set /p dummyName=%cd%";
+
 startProgram();
+
 function startProgram()
 {
-  actualPath=page.getResultCmd(actualPath);
 
+  actualPath=page.getResultCmd(actualPath);
+  console.log(actualPath);
   if(browser.params.menu==true)
   {
     showMenu(); 
