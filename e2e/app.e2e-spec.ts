@@ -17,18 +17,19 @@ var listOfCases = new Array();
 let page = new Methods();
 let actualPath="echo | set /p dummyName=%cd%";
 
-startProgram();
-
-function startProgram()
+createFolders();
+function createFolders()
 {
-
   actualPath=page.getResultCmd(actualPath);
   try
   {
     let commandCreateFolder="mkdir "+actualPath+"\\e2e\\downloadedFiles";
     page.executeResultCmd(commandCreateFolder);
   }catch(err){}
-
+  startProgram();
+}
+function startProgram()
+{
   if(browser.params.menu==true)
   {
     showMenu(); 
