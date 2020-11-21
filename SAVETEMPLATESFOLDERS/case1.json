@@ -1,0 +1,65 @@
+{
+  "nameCase":"test case 2",
+  "url": "https://www.calculator.net",
+  "components": 
+  [
+    {
+	  "name":"displayed", 
+	  "type":"GETBYXPATH",
+	  "route":"/html/body/div[3]/div/table/tbody/tr/td[1]/table/tbody/tr[2]/td[2]/div/div[2]/span[1]",
+	  "action":"ISDISPLAYED",
+	  "sendData":"JEJEJEE"
+	},
+	{
+	  "name":"enabled", 
+	  "type":"GETBYXPATH",
+	  "route":"/html/body/div[3]/div/table/tbody/tr/td[1]/table/tbody/tr[2]/td[2]/div/div[3]/span[2]",
+	  "action":"ISENABLED",
+	  "sendData":"JEJEJEE"
+	},
+    {
+	  "name":"set search", 
+	  "type":"GETBYXPATH",
+	  "route":"/html/body/div[3]/div/table/tbody/tr/td[2]/table/tbody/tr[1]/td[1]/input",
+	  "action":"DOSENDTEX",
+	  "sendData":"JEJEJEE"
+	},
+	{
+	  "name":"get search", 
+	  "type":"GETBYXPATH",
+	  "route":"/html/body/div[3]/div/table/tbody/tr/td[2]/table/tbody/tr[1]/td[1]/input",
+	  "action":"DOSENDTEX",
+	  "sendData":" "
+	},
+    {
+	  "name":"button2", 
+	  "type":"GETBYXPATH",
+	  "route":"/html/body/div[3]/div/table/tbody/tr/td[1]/table/tbody/tr[2]/td[2]/div/div[3]/span[2]",
+	  "action":"DOCLICK",
+	  "sendData":" "
+	},
+    {
+	  "name":"button4", 
+	  "type":"GETBYXPATH",
+	  "route":"/html/body/div[3]/div/table/tbody/tr/td[1]/table/tbody/tr[2]/td[2]/div/div[2]/span[1]",
+	  "action":"DOCLICK",
+	  "sendData":" "
+	}
+	,
+    {
+	  "name":"result", 
+	  "type":"GETBYXPATH",
+	  "route":"/html/body/div[3]/div/table/tbody/tr/td[1]/table/tbody/tr[2]/td[2]/div/div[5]/span[4]",
+	  "action":"DOCLICK",
+	  "sendData":" "
+	}
+	,
+    {
+	  "name":"get result", 
+	  "type":"GETBYXPATH",
+	  "route":"/html/body/div[3]/div/table/tbody/tr/td[1]/table/tbody/tr[1]/td/div/div[2]",
+	  "action":"DOGETTEXT",
+	  "sendData":" "
+	}
+  ]
+}

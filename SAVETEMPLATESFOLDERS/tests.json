@@ -1,0 +1,24 @@
+{
+  "emailsReport":
+  {
+    "sendReports":"NO",
+	"server":"smtp.gmail.com",
+	"port":587,
+    "from": "isacmore95@gmail.com DiciembrE34@",
+	"to":
+	[
+		"isaacdavidmoreravargas@outlook.es"
+	]
+  },
+  "casesToRun":
+  [ 
+    {
+      "location": "https://github.com/IsaacDavidMoreraVargas/WEB-TESTER-SELENIUM/",
+	  "timesToRepeat":2
+	},
+	{
+	  "location": "C:/Users/Alcatraz/Desktop/WEB-TESTER-SELENIUM/TEMPLATE-TEST/test/case.json",
+	  "timesToRepeat":1
+	}
+  ]
+}
