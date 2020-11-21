@@ -1,0 +1,995 @@
+import { Builder, WebElement, WebDriver, By, WebElementPromise} from'selenium-webdriver';
+import { Methods} from './diferentsFunctions';
+import { browser } from 'protractor';
+
+let failArray = ["\nFILE DOSEN'T EXISTS","FILE DOSEN'T EXISTS",""];
+let aproveArray = ["\nFILE EXISTS","FILE EXISTS","\nSTUDYING CASE"];
+let wrongArray = ["\nPARAMETERS WRONG","PARAMETERS WRONG","\nCONVERSION WRONG","CONVERSION WRONG"];
+let itemsArray = ["--->","<<>>","<<","\n>>"];
+let answersArray = ["\nTHE COMPONENT NAME:-","-RESULT IN?",",-ACTION: ","SUCESSFUL","NOT SUCESSFUL", ",-WAS FOUND?:-"];
+let arraySeparators = ["/HEAD","\n/LINE"];
+let failMessage="";
+let aproveMessage="";
+let bodyToSend="";
+var listOfCases = new Array();
+//https://drive.google.com/file/d/1Yl7Sg5sh0omWygfnWM83JwfcS46UPnWV/view
+
+let page = new Methods();
+let actualPath="echo | set /p dummyName=%cd%";
+startProgram();
+function startProgram()
+{
+  actualPath=page.getResultCmd(actualPath);
+
+  if(browser.params.menu==true)
+  {
+    showMenu(); 
+  }else
+  {
+    let command=browser.params.menu[1];
+    let splittedData=command.split(" ");
+    if(splittedData[0]=="ChargeCase")
+    {
+      if(splittedData.length==2)
+      {
+        /*
+        let exist=page.ifFileExistInsideComputer(splittedData[1]);
+        if(exist==true)
+        {
+          */
+          let dataJson=chargeFromComputer(splittedData[1]);
+          executingAfterCharge();
+          sendingEmails(dataJson);
+          /*
+        }else
+        {
+          failMessage+=failArray[0];
+        }
+        */
+      }else
+      {
+        failMessage+=itemsArray[3]+wrongArray[0]+itemsArray[3];
+      }
+      
+    }else
+    {
+      failMessage+=itemsArray[3]+wrongArray[0]+itemsArray[3];
+    }
+    
+  }
+  launchMessage();
+}
+
+function chargeFromComputer(urlToStudying)
+{
+  urlToStudying=urlToStudying.replace("\\", "/"); 
+  aproveMessage+=aproveArray[0]+itemsArray[0]+urlToStudying+arraySeparators[1];
+  let extract="";
+  for(let number=0; number<urlToStudying.length; number++)
+  {
+    if(number==5)
+    {
+      extract+=urlToStudying[number];
+      break;
+    }else
+    {
+      extract+=urlToStudying[number];
+    }
+  }
+
+  let dataJson;
+  let pathSave=actualPath+"\\e2e\\downloadedFiles\\general.json";
+  if(extract.includes("https:")||extract.includes("http:"))
+  {
+    let createCommand="powershell -Command "+'"& ' +actualPath+"\\e2e\\scripts\\scriptReadFileOnline.ps1 -url "+urlToStudying+" "+pathSave+'"';
+    page.executeResultCmd(createCommand);
+    let dataRead=page.chargeDataOfFile(pathSave);
+    dataJson=page.succesParseJson(dataRead);
+  }else
+  {
+    let exist=page.ifFileExistInsideComputer(urlToStudying);
+    if(exist==true)
+    {
+      page.readFileAndSaveFile(urlToStudying,pathSave);
+      let dataRead=page.chargeDataOfFile(urlToStudying);
+      dataJson=page.succesParseJson(dataRead);
+    }else
+    {
+      failMessage+=itemsArray[3]+wrongArray[0]+itemsArray[3];
+    }
+  }
+  page.eraseFiles(pathSave);
+
+  if(dataJson.casesToRun)
+  {
+    let pathSave=actualPath+"\\e2e\\downloadedFiles\\specific.json";
+    for(let numberCase=0; numberCase<dataJson.casesToRun.length;numberCase++)
+    {
+        let specificCase=dataJson.casesToRun[numberCase];
+        if(specificCase.location)
+        {
+          aproveMessage+=aproveArray[0]+itemsArray[0]+specificCase.location+arraySeparators[1];
+          let extract="";
+          for(let number=0; number<specificCase.location.length; number++)
+          {
+            if(number==5)
+            {
+              extract+=specificCase.location[number];
+              break;
+            }else
+            {
+              extract+=specificCase.location[number];
+            }
+          }
+
+          if(extract.includes("https:")||extract.includes("http:"))
+          {
+            let createCommand="powershell -Command "+'"& ' +actualPath+"\\e2e\\scripts\\scriptReadFileOnline.ps1 -url "+specificCase.location+" "+pathSave+'"';
+            page.executeResultCmd(createCommand);
+            let dataRead=page.chargeDataOfFile(pathSave);
+            let dataJsonSpecific=page.succesParseJson(dataRead);
+            for(let repeat=0; repeat<specificCase.timesToRepeat;repeat++)
+            {
+              let dataRead=page.chargeDataOfFile(pathSave);
+              let dataJsonSpecific2=page.succesParseJson(dataRead);
+              listOfCases.push(dataJsonSpecific2);
+            }
+            page.eraseFiles(pathSave);
+          }else
+          {
+            let exist=page.ifFileExistInsideComputer(specificCase.location);
+            if(exist==true)
+            {
+                page.readFileAndSaveFile(specificCase.location, pathSave);
+                for(let repeat=0; repeat<specificCase.timesToRepeat;repeat++)
+                {
+                  let dataRead=page.chargeDataOfFile(pathSave);
+                  let dataJsonSpecific2=page.succesParseJson(dataRead);
+                  listOfCases.push(dataJsonSpecific2);
+                }
+                page.eraseFiles(pathSave);
+            }else
+            {
+              failMessage+=itemsArray[3]+wrongArray[0]+itemsArray[3];
+            }
+          } 
+        }
+    }
+  }
+  return dataJson;
+}
+
+function executingAfterCharge()
+{
+  
+  for(let numberCases=0; numberCases<listOfCases.length; numberCases++)
+  {
+    let specificCase=listOfCases[numberCases];
+    describe('CHARGING FILES>>', function() 
+    {
+      it('FLAG START', () => 
+      {
+      });
+
+      it('EXECUTING SPECIFIC CASE: '+specificCase.nameCase.toUpperCase(), () => 
+      {
+        let allowStudy=true;
+        let urlStudy="";
+        let componentStudy="";
+        try
+        {
+          aproveMessage+=arraySeparators[1]+aproveArray[2]+itemsArray[0]+specificCase.nameCase.toUpperCase();
+        }catch(e)
+        {
+          failMessage+="\nYOUR CASE DOSEN'T HAS A NAME, A GOOD PRACTICE IS HAVING ONE TO DIFFERENCE WHAT IS HAPENNING";
+        }
+        try
+        {
+          browser.driver.get(specificCase.url);
+          aproveMessage+="\n"+arraySeparators[0];
+          aproveMessage+="\nURL"+itemsArray[0]+specificCase.url;
+        }catch(e)
+        {
+          failMessage+="\nYOUR CASE DOSEN'T HAS AN URL, IS IMPOSIBLE TO EXECUTE";
+          allowStudy=false;
+        }
+        try
+        {
+          componentStudy=specificCase.components;
+        }catch(e)
+        {
+          failMessage+="\nYOUR CASE DOSEN'T HAS COMPONENTS, IS IMPOSIBLE TO EXECUTE";
+          allowStudy=false;
+        }
+
+        if(allowStudy==true)
+        {
+          allowStudy=page.evaluateTemplateSpecific(componentStudy);
+          if(allowStudy==false)
+          {
+            failMessage+=wrongArray[0];
+          }else
+          {
+            executeCases(componentStudy);
+          }
+        }
+      });
+      it('SHOWING RESULTS', () => 
+      {
+        aproveMessage+=arraySeparators[1];
+        aproveMessage=page.beautifulPrinting(aproveMessage);
+        launchMessage();
+        failMessage="";
+        aproveMessage="";//arraySeparators[1];
+      });
+      it('FLAG END', () => 
+      {
+      });
+    });
+  }
+}
+
+
+function executeCases(componentStudy)
+{
+  for(let numberComponent=0; numberComponent<componentStudy.length; numberComponent++)
+  {
+    let name=componentStudy[numberComponent].name.toUpperCase();
+    let type=componentStudy[numberComponent].type.toUpperCase();
+    let route=componentStudy[numberComponent].route.toUpperCase();
+    let action=componentStudy[numberComponent].action.toUpperCase();
+    let sendData=componentStudy[numberComponent].sendData.toUpperCase();
+    aproveMessage+=answersArray[0]+name;
+    chooseType(componentStudy[numberComponent],type,route,action,sendData);
+  }
+}
+
+var component;
+function chooseType(componentStudy,type,route,action,sendData)
+{
+   switch(type)
+   {
+    case 
+    "GETBYID":
+      try
+      {
+        component = browser.driver.findElement(By.id(route));
+        aproveMessage+=answersArray[5]+answersArray[3];
+        chooseAction(component,action,sendData);
+      }catch(e)
+      {
+        failMessage+=answersArray[5]+itemsArray[0]+answersArray[4];
+      }
+    break;
+    case "GETBYNAME":
+      try
+      {
+        component = browser.driver.findElement(By.name(route));
+        aproveMessage+=answersArray[5]+answersArray[3];
+        chooseAction(component,action,sendData);
+      }catch(e)
+      {
+        failMessage+=answersArray[5]+itemsArray[0]+answersArray[4];
+      }
+    break;
+    case "GETBYCLASSNAME":
+      try
+      {
+        component = browser.driver.findElement(By.className(route));
+        aproveMessage+=answersArray[5]+answersArray[3];
+        chooseAction(component,action,sendData);
+      }catch(e)
+      {
+        failMessage+=answersArray[5]+itemsArray[0]+answersArray[4];
+      }
+    break;
+    case "GETBYTAGNAME":
+      try
+      {
+        component = browser.driver.findElement(By.tagName(route));
+        aproveMessage+=answersArray[5]+answersArray[3];
+        chooseAction(component,action,sendData);
+      }catch(e)
+      {
+        failMessage+=answersArray[5]+itemsArray[0]+answersArray[4];
+      }
+    break;
+    case "GETBYCSS":
+      try
+      {
+        component = browser.driver.findElement(By.css(route));
+        aproveMessage+=answersArray[5]+answersArray[3];
+        chooseAction(component,action,sendData);
+      }catch(e)
+      {
+        failMessage+=answersArray[5]+itemsArray[0]+answersArray[4];
+      }
+    break;
+    case "GETBYXPATH":
+      try
+      {
+        component = browser.driver.findElement(By.xpath(route));
+        aproveMessage+=answersArray[5]+answersArray[3];
+        chooseAction(component,action,sendData); 
+      }catch(e)
+      {
+        failMessage+=answersArray[5]+itemsArray[0]+answersArray[4];
+      }
+    break;
+    case "GETBYLINKTEXT":
+      try
+      {
+        component = browser.driver.findElement(By.linkText(route));
+        aproveMessage+=answersArray[5]+answersArray[3];
+        chooseAction(component,action,sendData);
+      }catch(e)
+      {
+        failMessage+=answersArray[5]+itemsArray[0]+answersArray[4];
+      }
+    break;
+    case "DO PROMISE":
+      try
+      {
+      let name=componentStudy.fatherAction.name.toUpperCase();
+      type=componentStudy.fatherAction.type.toUpperCase();
+      route=componentStudy.fatherAction.route.toUpperCase();
+      action=componentStudy.fatherAction.action.toUpperCase();
+      sendData=componentStudy.fatherAction.sendData.toUpperCase();
+      aproveMessage+=answersArray[0]+name;
+      chooseTypePromiseFather(componentStudy,type,route,action,sendData);
+      }catch(e)
+      {
+        failMessage+=wrongArray[0]+itemsArray[0]+"FATHER";
+      }
+    break;
+    case "GO BACK":
+      component =browser.driver.navigate().back();
+    break;
+    case "GO FOWARD":
+      component =browser.driver.navigate().forward();
+    break;
+    case "REFRESH":
+      component =browser.driver.navigate().refresh();
+    break;
+    case "CLOSE":
+      component =browser.driver.close();
+    break;
+   }
+   try
+   {
+     browser.actions().mouseMove(component).perform();
+   }catch(e)
+   {}
+}
+
+function chooseTypePromiseFather(componentStudyChild,type,route,action,sendData)
+{
+   switch(type)
+   {
+    case 
+    "GETBYID":
+      try
+      {
+        aproveMessage+=answersArray[5]+answersArray[3];
+        component = browser.driver.findElement(By.id(route));
+        chooseActionPromise(componentStudyChild,component,action,sendData);
+      }catch(e)
+      {
+        failMessage+=answersArray[5]+itemsArray[0]+answersArray[4];
+      }
+    break;
+    case "GETBYNAME":
+      try
+      {
+        aproveMessage+=answersArray[5]+answersArray[3];
+        component = browser.driver.findElement(By.name(route));
+        chooseActionPromise(componentStudyChild,component,action,sendData);
+      }catch(e)
+      {
+        failMessage+=answersArray[5]+itemsArray[0]+answersArray[4];
+      }
+    break;
+    case "GETBYCLASSNAME":
+      try
+      {
+        
+        aproveMessage+=answersArray[5]+answersArray[3];
+        component = browser.driver.findElement(By.className(route));
+        chooseActionPromise(componentStudyChild,component,action,sendData);
+      }catch(e)
+      {
+        failMessage+=answersArray[5]+itemsArray[0]+answersArray[4];
+      }
+    break;
+    case "GETBYTAGNAME":
+      try
+      {
+        aproveMessage+=answersArray[5]+answersArray[3];
+        component = browser.driver.findElement(By.tagName(route));
+        chooseActionPromise(componentStudyChild,component,action,sendData);
+      }catch(e)
+      {
+        failMessage+=answersArray[5]+itemsArray[0]+answersArray[4];
+      }
+    break;
+    case "GETBYCSS":
+      try
+      {
+        aproveMessage+=answersArray[5]+answersArray[3];
+        component = browser.driver.findElement(By.css(route));
+        chooseActionPromise(componentStudyChild,component,action,sendData);
+      }catch(e)
+      {
+        failMessage+=answersArray[5]+itemsArray[0]+answersArray[4];
+      }
+    break;
+    case "GETBYXPATH":
+      try
+      {
+        component = browser.driver.findElement(By.xpath(route));
+        aproveMessage+=answersArray[5]+answersArray[3];
+        chooseActionPromise(componentStudyChild,component,action,sendData);
+      }catch(e)
+      {
+        failMessage+=answersArray[5]+itemsArray[0]+answersArray[4];
+      }
+    break;
+    case "GETBYLINKTEXT":
+      try
+      {
+        aproveMessage+=answersArray[5]+answersArray[3];
+        component = browser.driver.findElement(By.linkText(route));
+        chooseActionPromise(componentStudyChild,component,action,sendData);
+      }catch(e)
+      {
+        failMessage+=answersArray[5]+itemsArray[0]+answersArray[4];
+      }
+    break;
+   }
+   browser.actions().mouseMove(component).perform();
+}
+
+var componentChild;
+function chooseTypeChild(type,route,action,sendData)
+{
+   switch(type)
+   {
+    case 
+    "GETBYID":
+      try
+      {
+        componentChild = browser.driver.findElement(By.id(route));
+        aproveMessage+=answersArray[5]+answersArray[3];
+        chooseAction(componentChild,action,sendData);
+      }catch(e)
+      {
+        failMessage+=answersArray[5]+itemsArray[0]+answersArray[4];
+      }
+    break;
+    case "GETBYNAME":
+      try
+      {
+        componentChild = browser.driver.findElement(By.name(route));
+        aproveMessage+=answersArray[5]+answersArray[3];
+        chooseAction(componentChild,action,sendData);
+      }catch(e)
+      {
+        failMessage+=answersArray[5]+itemsArray[0]+answersArray[4];
+      }
+    break;
+    case "GETBYCLASSNAME":
+      try
+      {
+        componentChild = browser.driver.findElement(By.className(route));
+        aproveMessage+=answersArray[5]+answersArray[3];
+        chooseAction(componentChild,action,sendData);
+      }catch(e)
+      {
+        failMessage+=answersArray[5]+itemsArray[0]+answersArray[4];
+      }
+    break;
+    case "GETBYTAGNAME":
+      try
+      {
+        componentChild = browser.driver.findElement(By.tagName(route));
+        aproveMessage+=answersArray[5]+answersArray[3];
+        chooseAction(componentChild,action,sendData);
+      }catch(e)
+      {
+        failMessage+=answersArray[5]+itemsArray[0]+answersArray[4];
+      }
+    break;
+    case "GETBYCSS":
+      try
+      {
+        componentChild = browser.driver.findElement(By.css(route));
+        aproveMessage+=answersArray[5]+answersArray[3];
+        chooseAction(componentChild,action,sendData);
+      }catch(e)
+      {
+        failMessage+=answersArray[5]+itemsArray[0]+answersArray[4];
+      }
+    break;
+    case "GETBYXPATH":
+      try
+      {
+        componentChild = browser.driver.findElement(By.xpath(route));
+        aproveMessage+=answersArray[5]+answersArray[3];
+        chooseAction(componentChild,action,sendData); 
+      }catch(e)
+      {
+        failMessage+=answersArray[5]+itemsArray[0]+answersArray[4];
+      }
+    break;
+    case "GETBYLINKTEXT":
+      try
+      {
+        componentChild = browser.driver.findElement(By.linkText(route));
+        aproveMessage+=answersArray[5]+answersArray[3];
+        chooseAction(componentChild,action,sendData);
+      }catch(e)
+      {
+        failMessage+=answersArray[5]+itemsArray[0]+answersArray[4];
+      }
+    break;
+   }
+   browser.actions().mouseMove(component).perform();
+}
+
+function chooseAction(component,action,sendData)
+{
+  switch(action)
+  {
+    case "DOCLICK":
+      try
+      {
+        component.click();
+        aproveMessage+=answersArray[2]+action+itemsArray[0]+answersArray[3];
+      }catch(e)
+      {
+        failMessage+=itemsArray[0]+answersArray[4];
+      }
+    break;
+    case "DOCLEAR":
+      try
+      {
+        component.clear();
+        aproveMessage+=answersArray[2]+action+itemsArray[0]+answersArray[3];
+      }catch(e)
+      {
+        failMessage+=itemsArray[0]+answersArray[4];
+      }
+    break;
+    case "DOSENDTEXT":
+      try
+      {
+        component.sendKeys(sendData);
+        aproveMessage+=answersArray[1]+itemsArray[0]+answersArray[3]+itemsArray[0]+sendData;
+      }catch(e)
+      {
+        failMessage+=itemsArray[0]+itemsArray[0]+answersArray[3]+answersArray[4];
+      }
+    break;
+    case "DOGETTEXT":
+      try
+      {
+        component.getText().then(function (text) 
+        {
+          aproveMessage+=",-TEXT"+itemsArray[0]+text; 
+        });
+      }catch(e)
+      {
+        failMessage+=itemsArray[0]+answersArray[4];
+      }
+    break;
+    case "DOGETACTUALURL":
+      try
+      {
+        component.getCurrentUrl().then(function (text) 
+        {
+          aproveMessage+=", TEXT"+itemsArray[0]+text;
+        });
+      }catch(e)
+      {
+        failMessage+=itemsArray[0]+answersArray[4];
+      }
+    break;
+    case "ISDISPLAYED":
+      try
+      {
+        let answer=component.isDisplayed();
+        aproveMessage+=",-IS DISPLAYED?"+itemsArray[0];
+        if(answer==true)
+        {
+          aproveMessage+="YES";
+        }else
+        {
+          aproveMessage+="NO";
+        }
+      }catch(e)
+      {
+        failMessage+=itemsArray[0]+answersArray[4];
+      }
+    break;
+    case "ISENABLED":
+      try
+      {
+        let answer=component.isEnabled();
+        aproveMessage+=",-IS ENABLED?"+itemsArray[0];
+        if(answer==true)
+        {
+          aproveMessage+="YES";
+        }else
+        {
+          aproveMessage+="NO";
+        }
+      }catch(e)
+      {
+        failMessage+=itemsArray[0]+answersArray[4];
+      }
+    break;
+    case "ISSELECTED":
+      try
+      {
+        let answer=component.isSelected();
+        aproveMessage+=", IS SELECTED?"+itemsArray[0];
+        if(answer==true)
+        {
+          aproveMessage+="YES";
+        }else
+        {
+          aproveMessage+="NO";
+        }
+      }catch(e)
+      {
+        failMessage+=itemsArray[0]+answersArray[4];
+      }
+    break;
+  }
+
+}
+
+function chooseActionPromise(componentStudyChild,component,action,sendData)
+{
+  switch(action)
+  {
+    case "DOCLICK":
+      try
+      {
+        
+        aproveMessage+=answersArray[2]+action+itemsArray[0]+answersArray[3];
+        component.click().then(()=>
+        {
+          try
+          {
+            
+            let name=componentStudyChild.childAction.name.toUpperCase();
+            let type=componentStudyChild.childAction.type.toUpperCase();
+            let route=componentStudyChild.childAction.route.toUpperCase();
+            action=componentStudyChild.childAction.action.toUpperCase();
+            sendData=componentStudyChild.childAction.sendData.toUpperCase();
+            aproveMessage+=answersArray[0]+name;
+            chooseTypeChild(type,route,action,sendData);
+          }catch(e)
+          {
+            failMessage+=wrongArray[0]+itemsArray[0]+"CHILD";
+          }
+        });
+      }catch(e)
+      {
+        failMessage+=itemsArray[0]+answersArray[4];
+      }
+    break;
+    case "DOCLEAR":
+      try
+      {
+        aproveMessage+=answersArray[2]+action+itemsArray[0]+answersArray[3];
+        component.clear().then(()=>
+        {
+          try
+          {
+            let name=componentStudyChild.childAction.name.toUpperCase();
+            let type=componentStudyChild.childAction.type.toUpperCase();
+            let route=componentStudyChild.childAction.route.toUpperCase();
+            action=componentStudyChild.childAction.action.toUpperCase();
+            sendData=componentStudyChild.childAction.sendData.toUpperCase();
+            aproveMessage+=answersArray[0]+name;
+            chooseTypeChild(type,route,action,sendData);
+          }catch(e)
+          {
+            failMessage+=wrongArray[0]+itemsArray[0]+"CHILD";
+          }
+        });
+      }catch(e)
+      {
+        failMessage+=itemsArray[0]+answersArray[4];
+      }
+    break;
+    case "DOSENDTEXT":
+      try
+      {
+        component.sendKeys(sendData).then(()=>
+        {
+          try
+          {
+            
+            let name=componentStudyChild.childAction.name.toUpperCase();
+            let type=componentStudyChild.childAction.type.toUpperCase();
+            let route=componentStudyChild.childAction.route.toUpperCase();
+            action=componentStudyChild.childAction.action.toUpperCase();
+            sendData=componentStudyChild.childAction.sendData.toUpperCase();
+            aproveMessage+=answersArray[0]+name;
+            chooseTypeChild(type,route,action,sendData);
+          }catch(e)
+          {
+            failMessage+=wrongArray[0]+itemsArray[0]+"CHILD";
+          }
+        });
+        aproveMessage+=answersArray[1]+itemsArray[0]+answersArray[3]+itemsArray[0]+sendData;
+      }catch(e)
+      {
+        failMessage+=itemsArray[0]+itemsArray[0]+answersArray[3]+answersArray[4];
+      }
+    break;
+    case "DOGETTEXT":
+      try
+      {
+        component.getText().then(function (text) 
+        {
+          aproveMessage+=", TEXT"+itemsArray[0]+text; 
+        }).then(()=>
+        {
+          try
+          {
+            
+            let name=componentStudyChild.childAction.name.toUpperCase();
+            let type=componentStudyChild.childAction.type.toUpperCase();
+            let route=componentStudyChild.childAction.route.toUpperCase();
+            action=componentStudyChild.childAction.action.toUpperCase();
+            sendData=componentStudyChild.childAction.sendData.toUpperCase();
+            aproveMessage+=answersArray[0]+name;
+            chooseTypeChild(type,route,action,sendData);
+          }catch(e)
+          {
+            failMessage+=wrongArray[0]+itemsArray[0]+"CHILD";
+          }
+        });
+      }catch(e)
+      {
+        failMessage+=itemsArray[0]+answersArray[4];
+      }
+    break;
+    case "DOGETACTUALURL":
+      try
+      {
+        component.getCurrentUrl().then(function (text) 
+        {
+          aproveMessage+=", TEXT"+itemsArray[0]+text;
+        }).then(()=>
+        {
+          try
+          {
+            
+            let name=componentStudyChild.childAction.name.toUpperCase();
+            let type=componentStudyChild.childAction.type.toUpperCase();
+            let route=componentStudyChild.childAction.route.toUpperCase();
+            action=componentStudyChild.childAction.action.toUpperCase();
+            sendData=componentStudyChild.childAction.sendData.toUpperCase();
+            aproveMessage+=answersArray[0]+name;
+            chooseTypeChild(type,route,action,sendData);
+          }catch(e)
+          {
+            failMessage+=wrongArray[0]+itemsArray[0]+"CHILD";
+          }
+        });
+      }catch(e)
+      {
+        failMessage+=itemsArray[0]+answersArray[4];
+      }
+    break;
+    case "ISDISPLAYED":
+      try
+      {
+        let answer=component.isDisplayed().then(function()
+        {
+          aproveMessage+=",-IS DISPLAYED?"+itemsArray[0];
+          if(answer==true)
+          {
+            aproveMessage+="YES";
+          }else
+          {
+            aproveMessage+="NO";
+          }
+        }).then(()=>
+        {
+          try
+          {
+            
+            let name=componentStudyChild.childAction.name.toUpperCase();
+            let type=componentStudyChild.childAction.type.toUpperCase();
+            let route=componentStudyChild.childAction.route.toUpperCase();
+            action=componentStudyChild.childAction.action.toUpperCase();
+            sendData=componentStudyChild.childAction.sendData.toUpperCase();
+            aproveMessage+=answersArray[0]+name;
+            chooseTypeChild(type,route,action,sendData);
+          }catch(e)
+          {
+            failMessage+=wrongArray[0]+itemsArray[0]+"CHILD";
+          }
+        });
+      }catch(e)
+      {
+        failMessage+=itemsArray[0]+answersArray[4];
+      }
+    break;
+    case "ISENABLED":
+      try
+      {
+        let answer=component.isEnabled().then(function()
+        {
+          aproveMessage+=",-IS ENABLED?"+itemsArray[0];
+          if(answer==true)
+          {
+            aproveMessage+="YES";
+          }else
+          {
+            aproveMessage+="NO";
+          }
+        }).then(()=>
+        {
+          try
+          {
+            
+            let name=componentStudyChild.childAction.name.toUpperCase();
+            let type=componentStudyChild.childAction.type.toUpperCase();
+            let route=componentStudyChild.childAction.route.toUpperCase();
+            action=componentStudyChild.childAction.action.toUpperCase();
+            sendData=componentStudyChild.childAction.sendData.toUpperCase();
+            aproveMessage+=answersArray[0]+name;
+            chooseTypeChild(type,route,action,sendData);
+          }catch(e)
+          {
+            failMessage+=wrongArray[0]+itemsArray[0]+"CHILD";
+          }
+        });
+      }catch(e)
+      {
+        failMessage+=itemsArray[0]+answersArray[4];
+      }
+    break;
+    case "ISSELECTED":
+      try
+      {
+        let answer=component.isSelected().then(function()
+        {
+          aproveMessage+=", IS SELECTED?"+itemsArray[0];
+          if(answer==true)
+          {
+            aproveMessage+="YES";
+          }else
+          {
+            aproveMessage+="NO";
+          }
+        }).then(()=>
+        {
+          try
+          {
+            
+            let name=componentStudyChild.childAction.name.toUpperCase();
+            let type=componentStudyChild.childAction.type.toUpperCase();
+            let route=componentStudyChild.childAction.route.toUpperCase();
+            action=componentStudyChild.childAction.action.toUpperCase();
+            sendData=componentStudyChild.childAction.sendData.toUpperCase();
+            aproveMessage+=answersArray[0]+name;
+            chooseTypeChild(type,route,action,sendData);
+          }catch(e)
+          {
+            failMessage+=wrongArray[0]+itemsArray[0]+"CHILD";
+          }
+        });
+      }catch(e)
+      {
+        failMessage+=itemsArray[0]+answersArray[4];
+      }
+    break;
+  }
+}
+
+function sendingEmails(dataJson)
+{
+  if(dataJson.emailsReport.sendReports=="YES")
+  {
+    it('SENDING EMAILS', () => 
+    {
+      let userAndPassword;
+      let listEmails= new Array();
+      if(dataJson.emailsReport)
+      {
+        if(dataJson.emailsReport.from)
+        {
+          userAndPassword=dataJson.emailsReport.from.split(" ");
+        }
+        if(dataJson.emailsReport.to)
+        {
+          for(let email=0; email<dataJson.emailsReport.to.length; email++)
+          {
+            listEmails.push(dataJson.emailsReport.to[email]);
+          }
+        }
+      }
+
+      //let result=getResultCmd(createCommand);
+      let createCommand="powershell -Command "+'"& ' +actualPath+"\\"+"e2e"+"\\"+"scripts"+"\\"+"scriptSendEmail.ps1 -userCredential "+userAndPassword[0]+" -passwordCredential "+userAndPassword[1]+" -pServer "+dataJson.emailsReport.server+" -pPort "+dataJson.emailsReport.port+" -pTo ";
+      for(let email in listEmails)
+      {
+        console.log("SENDING TO: "+listEmails[email]);
+        if(bodyToSend==null || bodyToSend=="" || bodyToSend==" ")
+        {
+          bodyToSend="ERROR ENVIANDO LOS RESULTADOS(NULL OR EMPTY)";
+        }else
+        {
+         
+          bodyToSend+="<>";
+        }
+        let sum="";
+        let final=" ";
+        for(let line of bodyToSend)
+        {
+           if(line.includes("\n"))
+           {
+            if(sum.includes("FILE EXISTS"))
+            {
+              sum="";
+            }if(sum=="\n")
+            {
+              sum="";
+            }
+            if(sum.includes("/LINE"))
+            {
+              sum="";
+            }else
+            {
+              sum=sum.replace(" ","&nbsp");
+              final+=sum+"<br />";
+              sum="";
+            }
+           }else
+           {
+              sum+=line;
+           }
+           
+        }
+        let sendMessage=createCommand+listEmails[email]+" -pFrom "+userAndPassword[0]+" -pSubject "+"RESULT-TEST-WEBTESTER"+" -pBody '"+final+"'"+'"';
+        page.executeResultCmd(sendMessage);
+      }  
+    });
+  }
+}
+
+function showMenu()
+{
+  let arrayMenu = ["\nMENU","\n1-GetFromComputer","\n2-GetFromURL","\n3-GetFromOnlineURL"];
+  
+  let sumData=arraySeparators[0];
+  sumData+=arrayMenu[0];
+  sumData+=arrayMenu[1];
+  sumData+=arrayMenu[2];
+  sumData+=arrayMenu[3];
+  sumData+=arraySeparators[1];
+  sumData=page.beautifulPrinting(sumData);
+  console.log(sumData);
+}
+
+function launchMessage()
+{
+  if(aproveMessage.length>0)
+  {
+    console.log(aproveMessage);
+    bodyToSend+=aproveMessage+"\n";
+  }
+  if(failMessage.length>0)
+  {
+    console.log(failMessage);
+    bodyToSend+=failMessage+"\n";
+  }
+}

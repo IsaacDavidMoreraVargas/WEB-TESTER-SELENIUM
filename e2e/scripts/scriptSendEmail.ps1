@@ -1,0 +1,3 @@
+﻿param([string]$userCredential,[string]$passwordCredential,[string]$pServer,[int]$pPort,[string]$pTo,[string]$pFrom,[string]$pSubject,[string]$pBody)
+$cred = ([pscredential]::new($userCredential,(ConvertTo-SecureString -String $passwordCredential -AsPlainText -Force)))
+Send-MailMessage -To $pTo -From $pFrom -Cc "TEST" -Subject $pSubject -BodyAsHtml $pBody -Credential $cred -SmtpServer $pServer -Port $pPort -UseSsl
