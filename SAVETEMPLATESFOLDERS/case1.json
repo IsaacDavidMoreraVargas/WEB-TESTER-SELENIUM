@@ -1,6 +1,8 @@
 {
   "nameCase":"test case 2",
   "url": "https://www.calculator.net",
+  "waitAngular":true,
+  "maximunTimeScripts":12000,
   "components": 
   [
     {

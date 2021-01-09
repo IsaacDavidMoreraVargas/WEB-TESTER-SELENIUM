@@ -1,6 +1,6 @@
 import { Builder, WebElement, WebDriver, By, WebElementPromise} from'selenium-webdriver';
 import { Methods} from './diferentsFunctions';
-import { browser } from 'protractor';
+import { browser,ExpectedConditions, protractor } from 'protractor';
 
 let failArray = ["\nFILE DOSEN'T EXISTS","FILE DOSEN'T EXISTS",""];
 let aproveArray = ["\nFILE EXISTS","FILE EXISTS","\nSTUDYING CASE"];
@@ -11,6 +11,10 @@ let arraySeparators = ["/HEAD","\n/LINE"];
 let failMessage="";
 let aproveMessage="";
 let bodyToSend="";
+let maximunTimeRun=12000;
+let waitORNotForAngular=true;
+var EC = protractor.ExpectedConditions;
+
 var listOfCases = new Array();
 //https://drive.google.com/file/d/1Yl7Sg5sh0omWygfnWM83JwfcS46UPnWV/view
 
@@ -191,6 +195,15 @@ function executingAfterCharge()
         }
         try
         {
+          waitORNotForAngular=specificCase.waitAngular;     
+        }catch(e)
+        {
+          failMessage+="\nYOUR CASE DOSEN'T HAS COMPONENTS, IS IMPOSIBLE TO EXECUTE";
+        }
+        browser.waitForAngularEnabled(waitORNotForAngular);
+
+        try
+        {
           browser.driver.get(specificCase.url);
           aproveMessage+="\n"+arraySeparators[0];
           aproveMessage+="\nURL"+itemsArray[0]+specificCase.url;
@@ -199,6 +212,15 @@ function executingAfterCharge()
           failMessage+="\nYOUR CASE DOSEN'T HAS AN URL, IS IMPOSIBLE TO EXECUTE";
           allowStudy=false;
         }
+
+        try
+        {
+          maximunTimeRun=specificCase.maximunTimeScripts;    
+        }catch(e)
+        {
+          failMessage+="\nYOUR CASE DOSEN'T HAS COMPONENTS, IS IMPOSIBLE TO EXECUTE";
+        }
+
         try
         {
           componentStudy=specificCase.components;
@@ -260,6 +282,7 @@ function chooseType(componentStudy,type,route,action,sendData)
       try
       {
         component = browser.driver.findElement(By.id(route));
+        browser.wait(EC.presenceOf(component),maximunTimeRun);
         aproveMessage+=answersArray[5]+answersArray[3];
         chooseAction(component,action,sendData);
       }catch(e)
@@ -271,6 +294,7 @@ function chooseType(componentStudy,type,route,action,sendData)
       try
       {
         component = browser.driver.findElement(By.name(route));
+        browser.wait(EC.presenceOf(component),maximunTimeRun);
         aproveMessage+=answersArray[5]+answersArray[3];
         chooseAction(component,action,sendData);
       }catch(e)
@@ -282,6 +306,7 @@ function chooseType(componentStudy,type,route,action,sendData)
       try
       {
         component = browser.driver.findElement(By.className(route));
+        browser.wait(EC.presenceOf(component),maximunTimeRun);
         aproveMessage+=answersArray[5]+answersArray[3];
         chooseAction(component,action,sendData);
       }catch(e)
@@ -293,6 +318,7 @@ function chooseType(componentStudy,type,route,action,sendData)
       try
       {
         component = browser.driver.findElement(By.tagName(route));
+        browser.wait(EC.presenceOf(component),maximunTimeRun);
         aproveMessage+=answersArray[5]+answersArray[3];
         chooseAction(component,action,sendData);
       }catch(e)
@@ -304,6 +330,7 @@ function chooseType(componentStudy,type,route,action,sendData)
       try
       {
         component = browser.driver.findElement(By.css(route));
+        browser.wait(EC.presenceOf(component),maximunTimeRun);
         aproveMessage+=answersArray[5]+answersArray[3];
         chooseAction(component,action,sendData);
       }catch(e)
@@ -315,6 +342,7 @@ function chooseType(componentStudy,type,route,action,sendData)
       try
       {
         component = browser.driver.findElement(By.xpath(route));
+        browser.wait(EC.presenceOf(component),maximunTimeRun);
         aproveMessage+=answersArray[5]+answersArray[3];
         chooseAction(component,action,sendData); 
       }catch(e)
@@ -326,6 +354,7 @@ function chooseType(componentStudy,type,route,action,sendData)
       try
       {
         component = browser.driver.findElement(By.linkText(route));
+        browser.wait(EC.presenceOf(component),maximunTimeRun);
         aproveMessage+=answersArray[5]+answersArray[3];
         chooseAction(component,action,sendData);
       }catch(e)
@@ -364,8 +393,7 @@ function chooseType(componentStudy,type,route,action,sendData)
    try
    {
      browser.actions().mouseMove(component).perform();
-   }catch(e)
-   {}
+   }catch(e){}
 }
 
 function chooseTypePromiseFather(componentStudyChild,type,route,action,sendData)
@@ -378,6 +406,7 @@ function chooseTypePromiseFather(componentStudyChild,type,route,action,sendData)
       {
         aproveMessage+=answersArray[5]+answersArray[3];
         component = browser.driver.findElement(By.id(route));
+        browser.wait(EC.presenceOf(component),maximunTimeRun);
         chooseActionPromise(componentStudyChild,component,action,sendData);
       }catch(e)
       {
@@ -389,6 +418,7 @@ function chooseTypePromiseFather(componentStudyChild,type,route,action,sendData)
       {
         aproveMessage+=answersArray[5]+answersArray[3];
         component = browser.driver.findElement(By.name(route));
+        browser.wait(EC.presenceOf(component),maximunTimeRun);
         chooseActionPromise(componentStudyChild,component,action,sendData);
       }catch(e)
       {
@@ -401,6 +431,7 @@ function chooseTypePromiseFather(componentStudyChild,type,route,action,sendData)
         
         aproveMessage+=answersArray[5]+answersArray[3];
         component = browser.driver.findElement(By.className(route));
+        browser.wait(EC.presenceOf(component),maximunTimeRun);
         chooseActionPromise(componentStudyChild,component,action,sendData);
       }catch(e)
       {
@@ -412,6 +443,7 @@ function chooseTypePromiseFather(componentStudyChild,type,route,action,sendData)
       {
         aproveMessage+=answersArray[5]+answersArray[3];
         component = browser.driver.findElement(By.tagName(route));
+        browser.wait(EC.presenceOf(component),maximunTimeRun);
         chooseActionPromise(componentStudyChild,component,action,sendData);
       }catch(e)
       {
@@ -423,6 +455,7 @@ function chooseTypePromiseFather(componentStudyChild,type,route,action,sendData)
       {
         aproveMessage+=answersArray[5]+answersArray[3];
         component = browser.driver.findElement(By.css(route));
+        browser.wait(EC.presenceOf(component),maximunTimeRun);
         chooseActionPromise(componentStudyChild,component,action,sendData);
       }catch(e)
       {
@@ -432,8 +465,9 @@ function chooseTypePromiseFather(componentStudyChild,type,route,action,sendData)
     case "GETBYXPATH":
       try
       {
-        component = browser.driver.findElement(By.xpath(route));
         aproveMessage+=answersArray[5]+answersArray[3];
+        component = browser.driver.findElement(By.xpath(route));
+        browser.wait(EC.presenceOf(component),maximunTimeRun);
         chooseActionPromise(componentStudyChild,component,action,sendData);
       }catch(e)
       {
@@ -445,6 +479,7 @@ function chooseTypePromiseFather(componentStudyChild,type,route,action,sendData)
       {
         aproveMessage+=answersArray[5]+answersArray[3];
         component = browser.driver.findElement(By.linkText(route));
+        browser.wait(EC.presenceOf(component),maximunTimeRun);
         chooseActionPromise(componentStudyChild,component,action,sendData);
       }catch(e)
       {
@@ -452,7 +487,10 @@ function chooseTypePromiseFather(componentStudyChild,type,route,action,sendData)
       }
     break;
    }
-   browser.actions().mouseMove(component).perform();
+   try
+   {
+      browser.actions().mouseMove(component).perform();
+   }catch(e){}
 }
 
 var componentChild;
@@ -465,6 +503,7 @@ function chooseTypeChild(type,route,action,sendData)
       try
       {
         componentChild = browser.driver.findElement(By.id(route));
+        browser.wait(EC.presenceOf(component),maximunTimeRun);
         aproveMessage+=answersArray[5]+answersArray[3];
         chooseAction(componentChild,action,sendData);
       }catch(e)
@@ -476,6 +515,7 @@ function chooseTypeChild(type,route,action,sendData)
       try
       {
         componentChild = browser.driver.findElement(By.name(route));
+        browser.wait(EC.presenceOf(component),maximunTimeRun);
         aproveMessage+=answersArray[5]+answersArray[3];
         chooseAction(componentChild,action,sendData);
       }catch(e)
@@ -487,6 +527,7 @@ function chooseTypeChild(type,route,action,sendData)
       try
       {
         componentChild = browser.driver.findElement(By.className(route));
+        browser.wait(EC.presenceOf(component),maximunTimeRun);
         aproveMessage+=answersArray[5]+answersArray[3];
         chooseAction(componentChild,action,sendData);
       }catch(e)
@@ -498,6 +539,7 @@ function chooseTypeChild(type,route,action,sendData)
       try
       {
         componentChild = browser.driver.findElement(By.tagName(route));
+        browser.wait(EC.presenceOf(component),maximunTimeRun);
         aproveMessage+=answersArray[5]+answersArray[3];
         chooseAction(componentChild,action,sendData);
       }catch(e)
@@ -509,6 +551,7 @@ function chooseTypeChild(type,route,action,sendData)
       try
       {
         componentChild = browser.driver.findElement(By.css(route));
+        browser.wait(EC.presenceOf(component),maximunTimeRun);
         aproveMessage+=answersArray[5]+answersArray[3];
         chooseAction(componentChild,action,sendData);
       }catch(e)
@@ -520,6 +563,7 @@ function chooseTypeChild(type,route,action,sendData)
       try
       {
         componentChild = browser.driver.findElement(By.xpath(route));
+        browser.wait(EC.presenceOf(component),maximunTimeRun);
         aproveMessage+=answersArray[5]+answersArray[3];
         chooseAction(componentChild,action,sendData); 
       }catch(e)
@@ -531,6 +575,7 @@ function chooseTypeChild(type,route,action,sendData)
       try
       {
         componentChild = browser.driver.findElement(By.linkText(route));
+        browser.wait(EC.presenceOf(component),maximunTimeRun);
         aproveMessage+=answersArray[5]+answersArray[3];
         chooseAction(componentChild,action,sendData);
       }catch(e)
@@ -539,7 +584,10 @@ function chooseTypeChild(type,route,action,sendData)
       }
     break;
    }
-   browser.actions().mouseMove(component).perform();
+   try
+   {
+     browser.actions().mouseMove(component).perform();
+   }catch(e){}
 }
 
 function chooseAction(component,action,sendData)
