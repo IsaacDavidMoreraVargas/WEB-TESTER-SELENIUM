@@ -290,7 +290,6 @@ async function chooseType(componentStudy,type,route,action,sendData)
       try
       {
         component = browser.driver.findElement(By.id(route));
-        
         aproveMessage+=answersArray[5]+answersArray[3];
         chooseAction(component,action,sendData);
       }catch(e)
@@ -302,7 +301,6 @@ async function chooseType(componentStudy,type,route,action,sendData)
       try
       {
         component = browser.driver.findElement(By.name(route));
-        
         aproveMessage+=answersArray[5]+answersArray[3];
         chooseAction(component,action,sendData);
       }catch(e)
@@ -314,7 +312,6 @@ async function chooseType(componentStudy,type,route,action,sendData)
       try
       {
         component = browser.driver.findElement(By.className(route));
-        
         aproveMessage+=answersArray[5]+answersArray[3];
         chooseAction(component,action,sendData);
       }catch(e)
@@ -326,7 +323,6 @@ async function chooseType(componentStudy,type,route,action,sendData)
       try
       {
         component = browser.driver.findElement(By.tagName(route));
-        
         aproveMessage+=answersArray[5]+answersArray[3];
         chooseAction(component,action,sendData);
       }catch(e)
@@ -338,7 +334,6 @@ async function chooseType(componentStudy,type,route,action,sendData)
       try
       {
         component = browser.driver.findElement(By.css(route));
-        
         aproveMessage+=answersArray[5]+answersArray[3];
         chooseAction(component,action,sendData);
       }catch(e)
@@ -350,7 +345,6 @@ async function chooseType(componentStudy,type,route,action,sendData)
       try
       {
         component = browser.driver.findElement(By.xpath(route));
-        
         aproveMessage+=answersArray[5]+answersArray[3];
         chooseAction(component,action,sendData); 
       }catch(e)
@@ -362,7 +356,6 @@ async function chooseType(componentStudy,type,route,action,sendData)
       try
       {
         component = browser.driver.findElement(By.linkText(route));
-        
         aproveMessage+=answersArray[5]+answersArray[3];
         chooseAction(component,action,sendData);
       }catch(e)
@@ -1029,13 +1022,12 @@ function sendingEmails(dataJson)
 
 function showMenu()
 {
-  let arrayMenu = ["\nMENU","\n1-GetFromComputer","\n2-GetFromURL","\n3-GetFromOnlineURL"];
+  let arrayMenu = ["\nMENU",'\n1-Not Headless Mode: npm run testNH -- --params.menu="ChargeCase <url file online or location of file inside the pc>"','\n2-Headless Mode: npm run testH -- --params.menu="ChargeCase <url file online or location of file inside the pc>"'];
   
   let sumData=arraySeparators[0];
   sumData+=arrayMenu[0];
   sumData+=arrayMenu[1];
   sumData+=arrayMenu[2];
-  sumData+=arrayMenu[3];
   sumData+=arraySeparators[1];
   sumData=page.beautifulPrinting(sumData);
   console.log(sumData);
