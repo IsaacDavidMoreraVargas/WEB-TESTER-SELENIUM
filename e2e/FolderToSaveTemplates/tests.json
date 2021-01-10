@@ -17,7 +17,7 @@
 	  "timesToRepeat":2
 	},
 	{
-	  "location": "C:/Users/Alcatraz/Desktop/WEB-TESTER-SELENIUM/SAVETEMPLATESFOLDERS/case.json",
+	  "location": "C:/Users/Alcatraz/Desktop/WEB-TESTER-SELENIUM/e2e/FolderToSaveTemplates/case.json",
 	  "timesToRepeat":1
 	}
   ]

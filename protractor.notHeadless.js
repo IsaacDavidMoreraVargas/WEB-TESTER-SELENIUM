@@ -1,20 +1,14 @@
 const { SpecReporter, StacktraceOption } = require('jasmine-spec-reporter');
-const { browser } = require('protractor');
-/*
- @type { import("protractor").Config }
- */
-
- 
 exports.config = {
   allScriptsTimeout: 11000,
   specs: [
-    './**/*.e2e-spec.ts'
+    './**/*.codeTester.ts'
   ],
   capabilities: {
     "browserName": 'chrome',
     "chromeOptions": 
     {
-      args: ["--headless","--disable-gpu","--window-size=2048,1080" ],
+      args: ["--disable-gpu","--window-size=2048,1080" ],
       binary: "C:/Program Files/Google/Chrome/Application/chrome.exe"
     },
   },

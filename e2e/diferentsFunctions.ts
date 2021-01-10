@@ -1,7 +1,3 @@
-
-//const fs = require('fs');
-//import { fs } from 'file-exists';
-//import { fs } from 'fs';
 import * as fs from 'fs';
 let failArrays = ["\nFILE DOSEN'T EXISTS","",""];
 let aproveArrays = ["\nFILE EXISTS","",""];
@@ -86,13 +82,7 @@ export class Methods
             {
                 let valeUrl=evaluate[data].location;
                 let valeTimes=evaluate[data].timesToRepeat;
-                
-                //if (!isNumeric(valeTimes))
-                //{
-                    //answer=false;
-                //}
-                
-               answer=true;
+                answer=true;
             }
         }catch(e)
         {

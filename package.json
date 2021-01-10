@@ -5,11 +5,10 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
-    "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
-    "testNH": "protractor protractor.notHeadless.js --params.menu",
-    "testH": "ng e2e"
+    "testNH":"protractor protractor.notHeadless.js --params.menu",
+    "testH": "protractor protractor.headless.js --params.menu"
   },
   "private": true,
   "dependencies": {
