@@ -1,13 +1,13 @@
 {
   "emailsReport":
   {
-    "sendReports":"NO",
+    "sendReports":true,
 	"server":"smtp.gmail.com",
 	"port":587,
-    "from": "isacmore95@gmail.com DiciembrE34@",
+    "from": "email passwordEmail",
 	"to":
 	[
-		"isaacdavidmoreravargas@outlook.es"
+		"email"
 	]
   },
   "casesToRun":

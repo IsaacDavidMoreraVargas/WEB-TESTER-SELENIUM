@@ -11,21 +11,24 @@ let arraySeparators = ["/HEAD","\n/LINE"];
 let failMessage="";
 let aproveMessage="";
 let bodyToSend="";
+
 let maximunTimeRun=11000;
 let waitORNotForAngular=false;
-var EC = protractor.ExpectedConditions;
 
 var listOfCases = new Array();
-
 let page = new Methods();
+
 let actualPath="echo | set /p dummyName=%cd%";
+let pathSave="";
+let pathScripts="";
 
 createFolders();
 
 function createFolders()
 {
-  actualPath=page.getResultCmd(actualPath);
-  actualPath+="\\e2e";
+  actualPath=page.getResultCmd(actualPath)+"\\e2e\\";
+  pathSave=actualPath+"FolderToDownloadFiles\\";
+  pathScripts=actualPath+"FolderForScripts\\";
   try
   {
     let commandCreateFolder="cd e2e && mkdir FolderToDownloadFiles";
@@ -83,26 +86,27 @@ function chargeFromComputer(urlToStudying)
   }
 
   let dataJson;
-  let pathSave=actualPath+"\\FolderToDownloadFiles\\general.json";
+  let pathMomentaneum=pathSave+"general.json";
+
   if(extract.includes("https:")||extract.includes("http:"))
   {
     try
     {
-      let createCommand="powershell -Command "+'"& ' +actualPath+"\\FolderForScripts\\scriptReadFileOnline.ps1 -url "+urlToStudying+" "+pathSave+'"';
+      let createCommand="powershell -Command "+'"& ' +pathScripts+"scriptReadFileOnline.ps1 -url "+urlToStudying+" "+pathMomentaneum+'"';
       page.executeResultCmd(createCommand);
-      let dataRead=page.chargeDataOfFile(pathSave);
+      let dataRead=page.chargeDataOfFile(pathMomentaneum);
       dataJson=page.succesParseJson(dataRead)
-      page.eraseFiles(pathSave);
+      page.eraseFiles(pathMomentaneum);
     }catch(err){failMessage+=itemsArray[3]+wrongArray[0]+itemsArray[3]+" PROBLEM DOWNLOADING FILE FROM ONLINE";}
   }else
   {
     let exist=page.ifFileExistInsideComputer(urlToStudying);
     if(exist==true)
     {
-      page.readFileAndSaveFile(urlToStudying,pathSave);
+      page.readFileAndSaveFile(urlToStudying,pathMomentaneum);
       let dataRead=page.chargeDataOfFile(urlToStudying);
       dataJson=page.succesParseJson(dataRead);
-      page.eraseFiles(pathSave);
+      page.eraseFiles(pathMomentaneum);
     }else
     {
       failMessage+=itemsArray[3]+wrongArray[0]+itemsArray[3]+" THIS CASE DOSEN'T EXIST IN THE COMPUTER";
@@ -112,7 +116,9 @@ function chargeFromComputer(urlToStudying)
 
   if(dataJson.casesToRun)
   {
-    let pathSave=actualPath+"\\FolderToDownloadFiles\\specific.json";
+
+    let pathMomentaneum=pathSave+"specific.json";
+
     for(let numberCase=0; numberCase<dataJson.casesToRun.length;numberCase++)
     {
         let specificCase=dataJson.casesToRun[numberCase];
@@ -134,33 +140,33 @@ function chargeFromComputer(urlToStudying)
 
           if(extract.includes("https:")||extract.includes("http:"))
           {
-            let createCommand="powershell -Command "+'"& ' +actualPath+"\\FolderForScripts\\scriptReadFileOnline.ps1 -url "+specificCase.location+" "+pathSave+'"';
+            let createCommand="powershell -Command "+'"& ' +pathScripts+"scriptReadFileOnline.ps1 -url "+specificCase.location+" "+pathMomentaneum+'"';
             try
             {
               page.executeResultCmd(createCommand);
-              let dataRead=page.chargeDataOfFile(pathSave);
+              let dataRead=page.chargeDataOfFile(pathMomentaneum);
               let dataJsonSpecific=page.succesParseJson(dataRead);
               for(let repeat=0; repeat<specificCase.timesToRepeat;repeat++)
               {
-                let dataRead=page.chargeDataOfFile(pathSave);
+                let dataRead=page.chargeDataOfFile(pathMomentaneum);
                 let dataJsonSpecific2=page.succesParseJson(dataRead);
                 listOfCases.push(dataJsonSpecific2);
               }
-              page.eraseFiles(pathSave);
+              page.eraseFiles(pathMomentaneum);
             }catch(err){failMessage+=itemsArray[3]+wrongArray[0]+itemsArray[3]+" PROBLEMS ON READING THE CASE ONLINE";}
           }else
           {
             let exist=page.ifFileExistInsideComputer(specificCase.location);
             if(exist==true)
             {
-                page.readFileAndSaveFile(specificCase.location, pathSave);
+                page.readFileAndSaveFile(specificCase.location, pathMomentaneum);
                 for(let repeat=0; repeat<specificCase.timesToRepeat;repeat++)
                 {
-                  let dataRead=page.chargeDataOfFile(pathSave);
+                  let dataRead=page.chargeDataOfFile(pathMomentaneum);
                   let dataJsonSpecific2=page.succesParseJson(dataRead);
                   listOfCases.push(dataJsonSpecific2);
                 }
-                page.eraseFiles(pathSave);
+                page.eraseFiles(pathMomentaneum);
             }else
             {
               failMessage+=itemsArray[3]+wrongArray[0]+itemsArray[3]+" PROBLEMS ON READING THE CASE INSIDE THE FOLDER";
@@ -284,7 +290,7 @@ async function chooseType(componentStudy,type,route,action,sendData)
       try
       {
         component = browser.driver.findElement(By.id(route));
-        //await browser.wait(EC.presenceOf(component),maximunTimeRun);
+        
         aproveMessage+=answersArray[5]+answersArray[3];
         chooseAction(component,action,sendData);
       }catch(e)
@@ -296,7 +302,7 @@ async function chooseType(componentStudy,type,route,action,sendData)
       try
       {
         component = browser.driver.findElement(By.name(route));
-        //await browser.wait(EC.presenceOf(component),maximunTimeRun);
+        
         aproveMessage+=answersArray[5]+answersArray[3];
         chooseAction(component,action,sendData);
       }catch(e)
@@ -308,7 +314,7 @@ async function chooseType(componentStudy,type,route,action,sendData)
       try
       {
         component = browser.driver.findElement(By.className(route));
-        //await browser.wait(EC.presenceOf(component),maximunTimeRun);
+        
         aproveMessage+=answersArray[5]+answersArray[3];
         chooseAction(component,action,sendData);
       }catch(e)
@@ -320,7 +326,7 @@ async function chooseType(componentStudy,type,route,action,sendData)
       try
       {
         component = browser.driver.findElement(By.tagName(route));
-        //await browser.wait(EC.presenceOf(component),maximunTimeRun);
+        
         aproveMessage+=answersArray[5]+answersArray[3];
         chooseAction(component,action,sendData);
       }catch(e)
@@ -332,7 +338,7 @@ async function chooseType(componentStudy,type,route,action,sendData)
       try
       {
         component = browser.driver.findElement(By.css(route));
-        //await browser.wait(EC.presenceOf(component),maximunTimeRun);
+        
         aproveMessage+=answersArray[5]+answersArray[3];
         chooseAction(component,action,sendData);
       }catch(e)
@@ -344,7 +350,7 @@ async function chooseType(componentStudy,type,route,action,sendData)
       try
       {
         component = browser.driver.findElement(By.xpath(route));
-        //await browser.wait(EC.presenceOf(component),maximunTimeRun);
+        
         aproveMessage+=answersArray[5]+answersArray[3];
         chooseAction(component,action,sendData); 
       }catch(e)
@@ -356,7 +362,7 @@ async function chooseType(componentStudy,type,route,action,sendData)
       try
       {
         component = browser.driver.findElement(By.linkText(route));
-        //await browser.wait(EC.presenceOf(component),maximunTimeRun);
+        
         aproveMessage+=answersArray[5]+answersArray[3];
         chooseAction(component,action,sendData);
       }catch(e)
@@ -408,7 +414,7 @@ function chooseTypePromiseFather(componentStudyChild,type,route,action,sendData)
       {
         aproveMessage+=answersArray[5]+answersArray[3];
         component = browser.driver.findElement(By.id(route));
-        //await browser.wait(EC.presenceOf(component),maximunTimeRun);
+        
         chooseActionPromise(componentStudyChild,component,action,sendData);
       }catch(e)
       {
@@ -420,7 +426,7 @@ function chooseTypePromiseFather(componentStudyChild,type,route,action,sendData)
       {
         aproveMessage+=answersArray[5]+answersArray[3];
         component = browser.driver.findElement(By.name(route));
-        //await browser.wait(EC.presenceOf(component),maximunTimeRun);
+        
         chooseActionPromise(componentStudyChild,component,action,sendData);
       }catch(e)
       {
@@ -433,7 +439,7 @@ function chooseTypePromiseFather(componentStudyChild,type,route,action,sendData)
         
         aproveMessage+=answersArray[5]+answersArray[3];
         component = browser.driver.findElement(By.className(route));
-        //await browser.wait(EC.presenceOf(component),maximunTimeRun);
+        
         chooseActionPromise(componentStudyChild,component,action,sendData);
       }catch(e)
       {
@@ -445,7 +451,7 @@ function chooseTypePromiseFather(componentStudyChild,type,route,action,sendData)
       {
         aproveMessage+=answersArray[5]+answersArray[3];
         component = browser.driver.findElement(By.tagName(route));
-        //await browser.wait(EC.presenceOf(component),maximunTimeRun);
+        
         chooseActionPromise(componentStudyChild,component,action,sendData);
       }catch(e)
       {
@@ -457,7 +463,7 @@ function chooseTypePromiseFather(componentStudyChild,type,route,action,sendData)
       {
         aproveMessage+=answersArray[5]+answersArray[3];
         component = browser.driver.findElement(By.css(route));
-        //await browser.wait(EC.presenceOf(component),maximunTimeRun);
+        
         chooseActionPromise(componentStudyChild,component,action,sendData);
       }catch(e)
       {
@@ -469,7 +475,7 @@ function chooseTypePromiseFather(componentStudyChild,type,route,action,sendData)
       {
         aproveMessage+=answersArray[5]+answersArray[3];
         component = browser.driver.findElement(By.xpath(route));
-        //await browser.wait(EC.presenceOf(component),maximunTimeRun);
+        
         chooseActionPromise(componentStudyChild,component,action,sendData);
       }catch(e)
       {
@@ -481,7 +487,7 @@ function chooseTypePromiseFather(componentStudyChild,type,route,action,sendData)
       {
         aproveMessage+=answersArray[5]+answersArray[3];
         component = browser.driver.findElement(By.linkText(route));
-        //await browser.wait(EC.presenceOf(component),maximunTimeRun);
+        
         chooseActionPromise(componentStudyChild,component,action,sendData);
       }catch(e)
       {
@@ -505,7 +511,7 @@ function chooseTypeChild(type,route,action,sendData)
       try
       {
         componentChild = browser.driver.findElement(By.id(route));
-        //await browser.wait(EC.presenceOf(component),maximunTimeRun);
+        
         aproveMessage+=answersArray[5]+answersArray[3];
         chooseAction(componentChild,action,sendData);
       }catch(e)
@@ -517,7 +523,7 @@ function chooseTypeChild(type,route,action,sendData)
       try
       {
         componentChild = browser.driver.findElement(By.name(route));
-        //await browser.wait(EC.presenceOf(component),maximunTimeRun);
+        
         aproveMessage+=answersArray[5]+answersArray[3];
         chooseAction(componentChild,action,sendData);
       }catch(e)
@@ -529,7 +535,7 @@ function chooseTypeChild(type,route,action,sendData)
       try
       {
         componentChild = browser.driver.findElement(By.className(route));
-        //await browser.wait(EC.presenceOf(component),maximunTimeRun);
+        
         aproveMessage+=answersArray[5]+answersArray[3];
         chooseAction(componentChild,action,sendData);
       }catch(e)
@@ -541,7 +547,7 @@ function chooseTypeChild(type,route,action,sendData)
       try
       {
         componentChild = browser.driver.findElement(By.tagName(route));
-        //await browser.wait(EC.presenceOf(component),maximunTimeRun);
+        
         aproveMessage+=answersArray[5]+answersArray[3];
         chooseAction(componentChild,action,sendData);
       }catch(e)
@@ -553,7 +559,7 @@ function chooseTypeChild(type,route,action,sendData)
       try
       {
         componentChild = browser.driver.findElement(By.css(route));
-        //await browser.wait(EC.presenceOf(component),maximunTimeRun);
+        
         aproveMessage+=answersArray[5]+answersArray[3];
         chooseAction(componentChild,action,sendData);
       }catch(e)
@@ -565,7 +571,7 @@ function chooseTypeChild(type,route,action,sendData)
       try
       {
         componentChild = browser.driver.findElement(By.xpath(route));
-        //await browser.wait(EC.presenceOf(component),maximunTimeRun);
+        
         aproveMessage+=answersArray[5]+answersArray[3];
         chooseAction(componentChild,action,sendData); 
       }catch(e)
@@ -577,7 +583,7 @@ function chooseTypeChild(type,route,action,sendData)
       try
       {
         componentChild = browser.driver.findElement(By.linkText(route));
-        //await browser.wait(EC.presenceOf(component),maximunTimeRun);
+        
         aproveMessage+=answersArray[5]+answersArray[3];
         chooseAction(componentChild,action,sendData);
       }catch(e)
@@ -953,7 +959,7 @@ function chooseActionPromise(componentStudyChild,component,action,sendData)
 
 function sendingEmails(dataJson)
 {
-  if(dataJson.emailsReport.sendReports=="YES")
+  if(dataJson.emailsReport.sendReports==true)
   {
     it('SENDING EMAILS', () => 
     {
@@ -974,8 +980,7 @@ function sendingEmails(dataJson)
         }
       }
 
-      //let result=getResultCmd(createCommand);
-      let createCommand="powershell -Command "+'"& ' +actualPath+"\\"+"e2e"+"\\"+"FolderForScripts"+"\\"+"scriptSendEmail.ps1 -userCredential "+userAndPassword[0]+" -passwordCredential "+userAndPassword[1]+" -pServer "+dataJson.emailsReport.server+" -pPort "+dataJson.emailsReport.port+" -pTo ";
+      let createCommand="powershell -Command "+'"& ' +pathScripts+"scriptSendEmail.ps1 -userCredential "+userAndPassword[0]+" -passwordCredential "+userAndPassword[1]+" -pServer "+dataJson.emailsReport.server+" -pPort "+dataJson.emailsReport.port+" -pTo ";
       for(let email in listEmails)
       {
         console.log("SENDING TO: "+listEmails[email]);
