@@ -1,6 +1,7 @@
 import { Builder, WebElement, WebDriver, By, WebElementPromise} from'selenium-webdriver';
 import { Methods} from './diferentsFunctions';
 import { browser,ExpectedConditions, protractor } from 'protractor';
+import { Console } from 'console';
 
 let failArray = ["\nFILE DOSEN'T EXISTS","FILE DOSEN'T EXISTS",""];
 let aproveArray = ["\nFILE EXISTS","FILE EXISTS","\nSTUDYING CASE"];
@@ -11,27 +12,29 @@ let arraySeparators = ["/HEAD","\n/LINE"];
 let failMessage="";
 let aproveMessage="";
 let bodyToSend="";
-let maximunTimeRun=12000;
-let waitORNotForAngular=true;
+let maximunTimeRun=11000;
+let waitORNotForAngular=false;
 var EC = protractor.ExpectedConditions;
 
 var listOfCases = new Array();
-//https://drive.google.com/file/d/1Yl7Sg5sh0omWygfnWM83JwfcS46UPnWV/view
 
 let page = new Methods();
 let actualPath="echo | set /p dummyName=%cd%";
 
 createFolders();
+
 function createFolders()
 {
   actualPath=page.getResultCmd(actualPath);
+  actualPath+="\\e2e";
   try
   {
-    let commandCreateFolder="mkdir "+actualPath+"\\e2e\\downloadedFiles";
+    let commandCreateFolder="cd e2e && mkdir downloadedFiles";
     page.executeResultCmd(commandCreateFolder);
   }catch(err){}
   startProgram();
 }
+
 function startProgram()
 {
   if(browser.params.menu==true)
@@ -40,7 +43,7 @@ function startProgram()
   }else
   {
     let command=browser.params.menu[1];
-    let splittedData=command.split(" ");
+    let splittedData=command.split(' ');
     if(splittedData[0]=="ChargeCase")
     {
       if(splittedData.length==2)
@@ -48,14 +51,15 @@ function startProgram()
         let dataJson=chargeFromComputer(splittedData[1]);
         executingAfterCharge();
         sendingEmails(dataJson);
+        
       }else
       {
-        failMessage+=itemsArray[3]+wrongArray[0]+itemsArray[3];
+        failMessage+=itemsArray[3]+wrongArray[0]+itemsArray[3]+" THE ORDER IN THE CONSOLE WAS WRONG, EXAMPLE:ChargeCase->PATH TO GENERAL FILE";
       }
       
     }else
     {
-      failMessage+=itemsArray[3]+wrongArray[0]+itemsArray[3];
+      failMessage+=itemsArray[3]+wrongArray[0]+itemsArray[3]+" SOMETHING WITH THE ORDER IS WRONG";
     }
     
   }
@@ -80,17 +84,17 @@ function chargeFromComputer(urlToStudying)
   }
 
   let dataJson;
-  let pathSave=actualPath+"\\e2e\\downloadedFiles\\general.json";
+  let pathSave=actualPath+"\\downloadedFiles\\general.json";
   if(extract.includes("https:")||extract.includes("http:"))
   {
     try
     {
-      let createCommand="powershell -Command "+'"& ' +actualPath+"\\e2e\\scripts\\scriptReadFileOnline.ps1 -url "+urlToStudying+" "+pathSave+'"';
+      let createCommand="powershell -Command "+'"& ' +actualPath+"\\scripts\\scriptReadFileOnline.ps1 -url "+urlToStudying+" "+pathSave+'"';
       page.executeResultCmd(createCommand);
       let dataRead=page.chargeDataOfFile(pathSave);
       dataJson=page.succesParseJson(dataRead)
       page.eraseFiles(pathSave);
-    }catch(err){failMessage+=itemsArray[3]+wrongArray[0]+itemsArray[3];}
+    }catch(err){failMessage+=itemsArray[3]+wrongArray[0]+itemsArray[3]+" PROBLEM DOWNLOADING FILE FROM ONLINE";}
   }else
   {
     let exist=page.ifFileExistInsideComputer(urlToStudying);
@@ -102,14 +106,14 @@ function chargeFromComputer(urlToStudying)
       page.eraseFiles(pathSave);
     }else
     {
-      failMessage+=itemsArray[3]+wrongArray[0]+itemsArray[3];
+      failMessage+=itemsArray[3]+wrongArray[0]+itemsArray[3]+" THIS CASE DOSEN'T EXIST IN THE COMPUTER";
     }
   }
  
 
   if(dataJson.casesToRun)
   {
-    let pathSave=actualPath+"\\e2e\\downloadedFiles\\specific.json";
+    let pathSave=actualPath+"\\downloadedFiles\\specific.json";
     for(let numberCase=0; numberCase<dataJson.casesToRun.length;numberCase++)
     {
         let specificCase=dataJson.casesToRun[numberCase];
@@ -131,7 +135,7 @@ function chargeFromComputer(urlToStudying)
 
           if(extract.includes("https:")||extract.includes("http:"))
           {
-            let createCommand="powershell -Command "+'"& ' +actualPath+"\\e2e\\scripts\\scriptReadFileOnline.ps1 -url "+specificCase.location+" "+pathSave+'"';
+            let createCommand="powershell -Command "+'"& ' +actualPath+"\\scripts\\scriptReadFileOnline.ps1 -url "+specificCase.location+" "+pathSave+'"';
             try
             {
               page.executeResultCmd(createCommand);
@@ -144,7 +148,7 @@ function chargeFromComputer(urlToStudying)
                 listOfCases.push(dataJsonSpecific2);
               }
               page.eraseFiles(pathSave);
-            }catch(err){failMessage+=itemsArray[3]+wrongArray[0]+itemsArray[3];}
+            }catch(err){failMessage+=itemsArray[3]+wrongArray[0]+itemsArray[3]+" PROBLEMS ON READING THE CASE ONLINE";}
           }else
           {
             let exist=page.ifFileExistInsideComputer(specificCase.location);
@@ -160,7 +164,7 @@ function chargeFromComputer(urlToStudying)
                 page.eraseFiles(pathSave);
             }else
             {
-              failMessage+=itemsArray[3]+wrongArray[0]+itemsArray[3];
+              failMessage+=itemsArray[3]+wrongArray[0]+itemsArray[3]+" PROBLEMS ON READING THE CASE INSIDE THE FOLDER";
             }
           } 
         }
@@ -184,7 +188,6 @@ function executingAfterCharge()
       it('EXECUTING SPECIFIC CASE: '+specificCase.nameCase.toUpperCase(), () => 
       {
         let allowStudy=true;
-        let urlStudy="";
         let componentStudy="";
         try
         {
@@ -198,7 +201,7 @@ function executingAfterCharge()
           waitORNotForAngular=specificCase.waitAngular;     
         }catch(e)
         {
-          failMessage+="\nYOUR CASE DOSEN'T HAS COMPONENTS, IS IMPOSIBLE TO EXECUTE";
+          failMessage+="\nYOUR CASE DOSEN'T HAS THE ORDER TO WAIT OR NOT FOR ANGULAR";
         }
         browser.waitForAngularEnabled(waitORNotForAngular);
 
@@ -218,7 +221,7 @@ function executingAfterCharge()
           maximunTimeRun=specificCase.maximunTimeScripts;    
         }catch(e)
         {
-          failMessage+="\nYOUR CASE DOSEN'T HAS COMPONENTS, IS IMPOSIBLE TO EXECUTE";
+          failMessage+="\nYOUR CASE DOSEN'T HAS MAXIMUN TIME FOR EVERY SCRIPT, THE PROGRAM WILL BE USING THE DEFAULTIME";
         }
 
         try
@@ -241,14 +244,14 @@ function executingAfterCharge()
             executeCases(componentStudy);
           }
         }
-      });
+      }, maximunTimeRun);
       it('SHOWING RESULTS', () => 
       {
         aproveMessage+=arraySeparators[1];
         aproveMessage=page.beautifulPrinting(aproveMessage);
         launchMessage();
         failMessage="";
-        aproveMessage="";//arraySeparators[1];
+        aproveMessage="";
       });
       it('FLAG END', () => 
       {
@@ -273,7 +276,7 @@ function executeCases(componentStudy)
 }
 
 var component;
-function chooseType(componentStudy,type,route,action,sendData)
+async function chooseType(componentStudy,type,route,action,sendData)
 {
    switch(type)
    {
@@ -282,7 +285,7 @@ function chooseType(componentStudy,type,route,action,sendData)
       try
       {
         component = browser.driver.findElement(By.id(route));
-        browser.wait(EC.presenceOf(component),maximunTimeRun);
+        //await browser.wait(EC.presenceOf(component),maximunTimeRun);
         aproveMessage+=answersArray[5]+answersArray[3];
         chooseAction(component,action,sendData);
       }catch(e)
@@ -294,7 +297,7 @@ function chooseType(componentStudy,type,route,action,sendData)
       try
       {
         component = browser.driver.findElement(By.name(route));
-        browser.wait(EC.presenceOf(component),maximunTimeRun);
+        //await browser.wait(EC.presenceOf(component),maximunTimeRun);
         aproveMessage+=answersArray[5]+answersArray[3];
         chooseAction(component,action,sendData);
       }catch(e)
@@ -306,7 +309,7 @@ function chooseType(componentStudy,type,route,action,sendData)
       try
       {
         component = browser.driver.findElement(By.className(route));
-        browser.wait(EC.presenceOf(component),maximunTimeRun);
+        //await browser.wait(EC.presenceOf(component),maximunTimeRun);
         aproveMessage+=answersArray[5]+answersArray[3];
         chooseAction(component,action,sendData);
       }catch(e)
@@ -318,7 +321,7 @@ function chooseType(componentStudy,type,route,action,sendData)
       try
       {
         component = browser.driver.findElement(By.tagName(route));
-        browser.wait(EC.presenceOf(component),maximunTimeRun);
+        //await browser.wait(EC.presenceOf(component),maximunTimeRun);
         aproveMessage+=answersArray[5]+answersArray[3];
         chooseAction(component,action,sendData);
       }catch(e)
@@ -330,7 +333,7 @@ function chooseType(componentStudy,type,route,action,sendData)
       try
       {
         component = browser.driver.findElement(By.css(route));
-        browser.wait(EC.presenceOf(component),maximunTimeRun);
+        //await browser.wait(EC.presenceOf(component),maximunTimeRun);
         aproveMessage+=answersArray[5]+answersArray[3];
         chooseAction(component,action,sendData);
       }catch(e)
@@ -342,7 +345,7 @@ function chooseType(componentStudy,type,route,action,sendData)
       try
       {
         component = browser.driver.findElement(By.xpath(route));
-        browser.wait(EC.presenceOf(component),maximunTimeRun);
+        //await browser.wait(EC.presenceOf(component),maximunTimeRun);
         aproveMessage+=answersArray[5]+answersArray[3];
         chooseAction(component,action,sendData); 
       }catch(e)
@@ -354,7 +357,7 @@ function chooseType(componentStudy,type,route,action,sendData)
       try
       {
         component = browser.driver.findElement(By.linkText(route));
-        browser.wait(EC.presenceOf(component),maximunTimeRun);
+        //await browser.wait(EC.presenceOf(component),maximunTimeRun);
         aproveMessage+=answersArray[5]+answersArray[3];
         chooseAction(component,action,sendData);
       }catch(e)
@@ -365,13 +368,13 @@ function chooseType(componentStudy,type,route,action,sendData)
     case "DO PROMISE":
       try
       {
-      let name=componentStudy.fatherAction.name.toUpperCase();
-      type=componentStudy.fatherAction.type.toUpperCase();
-      route=componentStudy.fatherAction.route.toUpperCase();
-      action=componentStudy.fatherAction.action.toUpperCase();
-      sendData=componentStudy.fatherAction.sendData.toUpperCase();
-      aproveMessage+=answersArray[0]+name;
-      chooseTypePromiseFather(componentStudy,type,route,action,sendData);
+        let name=componentStudy.fatherAction.name.toUpperCase();
+        type=componentStudy.fatherAction.type.toUpperCase();
+        route=componentStudy.fatherAction.route.toUpperCase();
+        action=componentStudy.fatherAction.action.toUpperCase();
+        sendData=componentStudy.fatherAction.sendData.toUpperCase();
+        aproveMessage+=answersArray[0]+name;
+        chooseTypePromiseFather(componentStudy,type,route,action,sendData);
       }catch(e)
       {
         failMessage+=wrongArray[0]+itemsArray[0]+"FATHER";
@@ -406,7 +409,7 @@ function chooseTypePromiseFather(componentStudyChild,type,route,action,sendData)
       {
         aproveMessage+=answersArray[5]+answersArray[3];
         component = browser.driver.findElement(By.id(route));
-        browser.wait(EC.presenceOf(component),maximunTimeRun);
+        //await browser.wait(EC.presenceOf(component),maximunTimeRun);
         chooseActionPromise(componentStudyChild,component,action,sendData);
       }catch(e)
       {
@@ -418,7 +421,7 @@ function chooseTypePromiseFather(componentStudyChild,type,route,action,sendData)
       {
         aproveMessage+=answersArray[5]+answersArray[3];
         component = browser.driver.findElement(By.name(route));
-        browser.wait(EC.presenceOf(component),maximunTimeRun);
+        //await browser.wait(EC.presenceOf(component),maximunTimeRun);
         chooseActionPromise(componentStudyChild,component,action,sendData);
       }catch(e)
       {
@@ -431,7 +434,7 @@ function chooseTypePromiseFather(componentStudyChild,type,route,action,sendData)
         
         aproveMessage+=answersArray[5]+answersArray[3];
         component = browser.driver.findElement(By.className(route));
-        browser.wait(EC.presenceOf(component),maximunTimeRun);
+        //await browser.wait(EC.presenceOf(component),maximunTimeRun);
         chooseActionPromise(componentStudyChild,component,action,sendData);
       }catch(e)
       {
@@ -443,7 +446,7 @@ function chooseTypePromiseFather(componentStudyChild,type,route,action,sendData)
       {
         aproveMessage+=answersArray[5]+answersArray[3];
         component = browser.driver.findElement(By.tagName(route));
-        browser.wait(EC.presenceOf(component),maximunTimeRun);
+        //await browser.wait(EC.presenceOf(component),maximunTimeRun);
         chooseActionPromise(componentStudyChild,component,action,sendData);
       }catch(e)
       {
@@ -455,7 +458,7 @@ function chooseTypePromiseFather(componentStudyChild,type,route,action,sendData)
       {
         aproveMessage+=answersArray[5]+answersArray[3];
         component = browser.driver.findElement(By.css(route));
-        browser.wait(EC.presenceOf(component),maximunTimeRun);
+        //await browser.wait(EC.presenceOf(component),maximunTimeRun);
         chooseActionPromise(componentStudyChild,component,action,sendData);
       }catch(e)
       {
@@ -467,7 +470,7 @@ function chooseTypePromiseFather(componentStudyChild,type,route,action,sendData)
       {
         aproveMessage+=answersArray[5]+answersArray[3];
         component = browser.driver.findElement(By.xpath(route));
-        browser.wait(EC.presenceOf(component),maximunTimeRun);
+        //await browser.wait(EC.presenceOf(component),maximunTimeRun);
         chooseActionPromise(componentStudyChild,component,action,sendData);
       }catch(e)
       {
@@ -479,7 +482,7 @@ function chooseTypePromiseFather(componentStudyChild,type,route,action,sendData)
       {
         aproveMessage+=answersArray[5]+answersArray[3];
         component = browser.driver.findElement(By.linkText(route));
-        browser.wait(EC.presenceOf(component),maximunTimeRun);
+        //await browser.wait(EC.presenceOf(component),maximunTimeRun);
         chooseActionPromise(componentStudyChild,component,action,sendData);
       }catch(e)
       {
@@ -503,7 +506,7 @@ function chooseTypeChild(type,route,action,sendData)
       try
       {
         componentChild = browser.driver.findElement(By.id(route));
-        browser.wait(EC.presenceOf(component),maximunTimeRun);
+        //await browser.wait(EC.presenceOf(component),maximunTimeRun);
         aproveMessage+=answersArray[5]+answersArray[3];
         chooseAction(componentChild,action,sendData);
       }catch(e)
@@ -515,7 +518,7 @@ function chooseTypeChild(type,route,action,sendData)
       try
       {
         componentChild = browser.driver.findElement(By.name(route));
-        browser.wait(EC.presenceOf(component),maximunTimeRun);
+        //await browser.wait(EC.presenceOf(component),maximunTimeRun);
         aproveMessage+=answersArray[5]+answersArray[3];
         chooseAction(componentChild,action,sendData);
       }catch(e)
@@ -527,7 +530,7 @@ function chooseTypeChild(type,route,action,sendData)
       try
       {
         componentChild = browser.driver.findElement(By.className(route));
-        browser.wait(EC.presenceOf(component),maximunTimeRun);
+        //await browser.wait(EC.presenceOf(component),maximunTimeRun);
         aproveMessage+=answersArray[5]+answersArray[3];
         chooseAction(componentChild,action,sendData);
       }catch(e)
@@ -539,7 +542,7 @@ function chooseTypeChild(type,route,action,sendData)
       try
       {
         componentChild = browser.driver.findElement(By.tagName(route));
-        browser.wait(EC.presenceOf(component),maximunTimeRun);
+        //await browser.wait(EC.presenceOf(component),maximunTimeRun);
         aproveMessage+=answersArray[5]+answersArray[3];
         chooseAction(componentChild,action,sendData);
       }catch(e)
@@ -551,7 +554,7 @@ function chooseTypeChild(type,route,action,sendData)
       try
       {
         componentChild = browser.driver.findElement(By.css(route));
-        browser.wait(EC.presenceOf(component),maximunTimeRun);
+        //await browser.wait(EC.presenceOf(component),maximunTimeRun);
         aproveMessage+=answersArray[5]+answersArray[3];
         chooseAction(componentChild,action,sendData);
       }catch(e)
@@ -563,7 +566,7 @@ function chooseTypeChild(type,route,action,sendData)
       try
       {
         componentChild = browser.driver.findElement(By.xpath(route));
-        browser.wait(EC.presenceOf(component),maximunTimeRun);
+        //await browser.wait(EC.presenceOf(component),maximunTimeRun);
         aproveMessage+=answersArray[5]+answersArray[3];
         chooseAction(componentChild,action,sendData); 
       }catch(e)
@@ -575,7 +578,7 @@ function chooseTypeChild(type,route,action,sendData)
       try
       {
         componentChild = browser.driver.findElement(By.linkText(route));
-        browser.wait(EC.presenceOf(component),maximunTimeRun);
+        //await browser.wait(EC.presenceOf(component),maximunTimeRun);
         aproveMessage+=answersArray[5]+answersArray[3];
         chooseAction(componentChild,action,sendData);
       }catch(e)

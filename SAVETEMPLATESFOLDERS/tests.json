@@ -4,10 +4,10 @@
     "sendReports":"NO",
 	"server":"smtp.gmail.com",
 	"port":587,
-    "from": "isacmore95@gmail.com DiciembrE34@",
+    "from": "email password",
 	"to":
 	[
-		"isaacdavidmoreravargas@outlook.es"
+		"email"
 	]
   },
   "casesToRun":

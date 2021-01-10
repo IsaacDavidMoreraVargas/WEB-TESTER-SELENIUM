@@ -106,10 +106,10 @@
             ]
           }
         },
-        "e2e": {
+        "testNH": {
           "builder": "@angular-devkit/build-angular:protractor",
           "options": {
-            "protractorConfig": "e2e/protractor.conf.js",
+            "protractorConfig": "protractor.notHeadless.js --params.menu",
             "devServerTarget": "WEBTESTER:serve"
           },
           "configurations": {
@@ -118,10 +118,10 @@
             }
           }
         },
-        "testNH": {
+        "testH": {
           "builder": "@angular-devkit/build-angular:protractor",
           "options": {
-            "protractorConfig": "e2e/protractor.notHeadless.js --params.menu",
+            "protractorConfig": "protractor.headless.js --params.menu",
             "devServerTarget": "WEBTESTER:serve"
           },
           "configurations": {
