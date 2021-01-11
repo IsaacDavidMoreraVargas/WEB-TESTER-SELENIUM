@@ -19,6 +19,7 @@ var listOfCases = new Array();
 let page = new Methods();
 
 let actualPath="echo | set /p dummyName=%cd%";
+let pathInstall="";
 let pathSave="";
 let pathScripts="";
 
@@ -26,7 +27,9 @@ createFolders();
 
 function createFolders()
 {
-  actualPath=page.getResultCmd(actualPath)+"\\e2e\\";
+  actualPath=page.getResultCmd(actualPath);
+  pathInstall=actualPath;
+  actualPath+="\\e2e\\";
   pathSave=actualPath+"FolderToDownloadFiles\\";
   pathScripts=actualPath+"FolderForScripts\\";
   try
@@ -39,12 +42,14 @@ function createFolders()
 
 function startProgram()
 {
+  let command=browser.params.menu[1];
   if(browser.params.menu==true)
   {
     showMenu(); 
-  }else
+  }
+  else
   {
-    let command=browser.params.menu[1];
+    
     let splittedData=command.split(' ');
     if(splittedData[0]=="ChargeCase")
     {
@@ -67,6 +72,7 @@ function startProgram()
   }
   launchMessage();
 }
+
 
 function chargeFromComputer(urlToStudying)
 {

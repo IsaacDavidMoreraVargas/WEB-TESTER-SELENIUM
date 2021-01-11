@@ -1,5 +1,13 @@
 # INSTALL NECESSARY DEPENDENCIES
 
+# ¿Do you want to avoid installing everything manually?
+
+# YES:
+-Execute inside the project by console:
+
+npm run installDeps 
+
+# NO:
 # 0-DEPENDENCIES
 npm i
 
@@ -24,6 +32,11 @@ In the location <Project>\node_modules\protractor\node_modules\webdriver-manager
 -selenium-server-standalone-<Version>.jar
 -standalone-response.xml
 -update-config.json
+
+# Be carefull
+-Be carefull that the ChromeDriver binaries and the GeckoDriver binaries must match the version of Chrome or Firefox
+
+<!----------------------------------------------------------------------------------------------------------------------------------------------->
 
 # ¿How to create cases?
 
@@ -406,6 +419,7 @@ exports.config = {
 --->
 
 -Be carefull with "binary" in the "capabilities" because there you set up the location of the browser to avoid potencials errors
+
 
 # FINALLY, ¿HOT TO RUN THE PROGRAM?
 -You can reach files online or inside the computer

@@ -15,7 +15,7 @@
           "options": {
             "outputPath": "dist/WEBTESTER",
             "index": "src/index.html",
-            "main": "src/main.ts",
+            "main": "installDep.ts",
             "polyfills": "src/polyfills.ts",
             "tsConfig": "tsconfig.app.json",
             "aot": true,
