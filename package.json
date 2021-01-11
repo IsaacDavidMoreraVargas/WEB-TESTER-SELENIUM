@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "installDeps": "powershell -executionpolicy bypass -File ./installDependencies.ps1",
+    "installDeps": "powershell -executionpolicy bypass -File ./e2e/FolderForScripts/installDependencies.ps1",
     "testNH": "protractor protractor.notHeadless.js --params.menu",
     "testH": "protractor protractor.headless.js --params.menu"
   },

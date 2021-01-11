@@ -43,7 +43,7 @@ In the location <Project>\node_modules\protractor\node_modules\webdriver-manager
 1-General file: From this file we are going to call the other cases.
 
 # Template-General-Case.json: 
-<!---
+
 {
   "emailsReport":
   {
@@ -70,7 +70,7 @@ In the location <Project>\node_modules\protractor\node_modules\webdriver-manager
 	}
   ]
 }
---->
+
 As you can see: 
 -You can send emails or not with the results of the test(replace in "from" the "email" and "password" with the email that you want to use to send the results and replace in "to" the "email" where you want to send the results. I recommend to use gmail to send the emails and in the gmail security configurations you must allow the access to unsecure apps since I use powershell script to send the emails)
 -In location, you set the url of the Template-Specific-Case.json to reach (you can charge configuration files online or inside you computer), be aware that if you want to read online files the data must be raw and being able to download locally since I use a powershell script to download and the script is not that powerfull against errors. You can charge as many Template-Specific-Case.json as you want, please just follow the template of Template-General-Case.json
@@ -79,7 +79,7 @@ As you can see:
 1-Specific file: From this file we are going to set up the component's webpage to interact with.
 
 # Template-Specific-Case.json: 
-<!---
+
 {
   "nameCase":"test case 2",
   "url": "https://www.calculator.net",
@@ -140,7 +140,7 @@ As you can see:
 	}
   ]
 }
---->
+
 As you can see: 
 -"NameCase" is to differentiate the name of each test, in that way you can recognize easier everything in the moment to read the results
 -"url" is to charge the url where the app is running and is the app that you want to test(the app must be running at least in localhost so selenium can interact with the app)
@@ -180,52 +180,47 @@ As you can see:
 # EXAMPLES
 -GETBYID:
 # <div id="mainFrame"><div>
-<!---
 "type":"GETBYID",
 "route":"mainFrame"
---->
+
+
 -GETBYNAME:
 # <div name="mainFrame"><div>
-<!---
 "type":"GETBYNAME",
 "route":"mainFrame"
---->
+
 -GETBYCLASSNAME:
 # <div class="mainFrame"><div>
-<!---
 "type":"GETBYCLASSNAME",
 "route":"mainFrame"
---->
+
 -GETBYTAGNAME:
 # <div name="mainFrame"><div>
-<!---
 "type":"GETBYTAGNAME",
 "route":"div"
---->
+
 -GETBYCSS:
 # <div class="mainFrame"><div>
-<!---
 "type":"GETBYCSS",
 "route":".mainFrame"
---->
+
 -GETBYXPATH:
 # <div id="mainFrame"><div>
-<!---
 "type":"GETBYXPATH",
 "route":"/html/body/div[3]/div/table/tbody/tr/td[1]/table/tbody/tr[2]/td[2]/div/div[5]/span[4]"
----> 
+
+
 -GETBYLINKTEXT:
 # <div href="https://www.online-calculator.com"><div>
-<!---
 "type":"GETBYLINKTEXT",
 "route":"online-calculator"
---->
+
 
 # ¿DO YOU WANT TO KNOW HOW TO DO A PROMISE?
 A promise is an action Father-Child, it means that you expect to execute immediately a second action(child) after the first action finished(father), it is a chain of actions. 
 
 -Template of a component of promise
-<!---
+
 {
 	  "name":"DO PROMISE-SET-GET", 
 	  "type":"DO PROMISE",
@@ -249,7 +244,7 @@ A promise is an action Father-Child, it means that you expect to execute immedia
 	    "sendData":" "
 	  }
 	}
---->
+
 
 # THINGS TO HAVE IN COUNT
 
@@ -257,7 +252,7 @@ A promise is an action Father-Child, it means that you expect to execute immedia
 -The configuration to use Firefox instead of Chrome
 
 # Template protractor.headless.js version Firefox: 
-<!---
+
 const { SpecReporter, StacktraceOption } = require('jasmine-spec-reporter');
 exports.config = {
   allScriptsTimeout: 11000,
@@ -294,10 +289,10 @@ exports.config = {
     }));
   }
 };
---->
+
 
 # Template protractor.notHeadless.js version Firefox:
-<!---
+
 const { SpecReporter, StacktraceOption } = require('jasmine-spec-reporter');
 exports.config = {
   allScriptsTimeout: 11000,
@@ -333,11 +328,11 @@ exports.config = {
     }));
   }
 };
---->
+
 
 
 # Template protractor.headless.js version Chrome: 
-<!---
+
 const { SpecReporter, StacktraceOption } = require('jasmine-spec-reporter');
 exports.config = {
   allScriptsTimeout: 11000,
@@ -375,10 +370,10 @@ exports.config = {
     }));
   }
 };
---->
+
 
 # Template protractor.notHeadless.js version Chrome:
-<!---
+
 const { SpecReporter, StacktraceOption } = require('jasmine-spec-reporter');
 exports.config = {
   allScriptsTimeout: 11000,
@@ -416,31 +411,30 @@ exports.config = {
     }));
   }
 };
---->
+
 
 -Be carefull with "binary" in the "capabilities" because there you set up the location of the browser to avoid potencials errors
 
 
-# FINALLY, ¿HOT TO RUN THE PROGRAM?
+# FINALLY, ¿HOW TO RUN THE PROGRAM?
 -You can reach files online or inside the computer
 -Open the terminal inside the project and execute:
 -Dont forget to follow the sintax: 
-<!---
+
 npm run testH -- --params.menu="ChargeCase <url file online or location of file inside the pc>"
 
 or 
 
 npm run testNH -- --params.menu="ChargeCase <url file online or location of file inside the pc>"
---->
 
--¿Do you want to run the program showing the browser?
-# npm run testH 
+testH: Means that is going to work showing the browser
+testNH : Means that is going to work not showing the browser
+
+Example:
 npm run testH -- --params.menu="ChargeCase C:\Users\Alcatraz\Desktop\PROYECTOS-PROGRAMACION\WEB-TESTER-SELENIUM\e2e\FolderToSaveTemplates\tests.json"
 
--¿Do you want to run the program not showing the browser?
-# npm run testNH 
-npm run testNH -- --params.menu="ChargeCase https://Users\Alcatraz\Desktop\PROYECTOS-PROGRAMACION\WEB-TESTER-SELENIUM\e2e\FolderToSaveTemplates\tests.json"
 
 # npm run testNH or npm run testH To open the menu
-npm run testNH or npm run testH 
+npm run testNH 
+npm run testH 
 

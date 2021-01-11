@@ -1028,12 +1028,13 @@ function sendingEmails(dataJson)
 
 function showMenu()
 {
-  let arrayMenu = ["\nMENU",'\n1-Not Headless Mode: npm run testNH -- --params.menu="ChargeCase <url file online or location of file inside the pc>"','\n2-Headless Mode: npm run testH -- --params.menu="ChargeCase <url file online or location of file inside the pc>"'];
+  let arrayMenu = ["\nMENU",'\n0-Install dependencies: npm run installDeps','\n1-Not Headless Mode: npm run testNH -- --params.menu="ChargeCase <url file online or location of file inside the pc>"','\n2-Headless Mode: npm run testH -- --params.menu="ChargeCase <url file online or location of file inside the pc>"'];
   
   let sumData=arraySeparators[0];
   sumData+=arrayMenu[0];
   sumData+=arrayMenu[1];
   sumData+=arrayMenu[2];
+  sumData+=arrayMenu[3];
   sumData+=arraySeparators[1];
   sumData=page.beautifulPrinting(sumData);
   console.log(sumData);
